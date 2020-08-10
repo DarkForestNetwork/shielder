@@ -47,6 +47,23 @@ jobs:
           paths:
             - ~/shielder/.nox
 
+  mypy:
+    executor: py37
+    working_directory: ~/shielder
+    steps:
+      - checkout
+      - install-nox
+      - restore_cache:
+          key: mypy-v1-{{ checksum "~/fingerprint_python.txt" }}-{{ checksum "requirements.txt" }}
+      - run:
+          name: "Run mypy with nox"
+          command: |
+            nox -s mypy
+      - save_cache:
+          key: mypy-v1-{{ checksum "~/fingerprint_python.txt" }}-{{ checksum "requirements.txt" }}
+          paths:
+            - ~/shielder/.nox
+
   test-contracts:
     executor: py37
     working_directory: ~/shielder
@@ -55,15 +72,16 @@ jobs:
       - install-nox
       - restore_cache:
           keys:
-            - test-v1-{{ checksum "~/fingerprint_python.txt" }}-{{ checksum "requirements.txt" }}
+            - test-contracts-v1-{{ checksum "~/fingerprint_python.txt" }}-{{ checksum "requirements.txt" }}
       - run:
           name: "Run tests"
           command: |
             nox -s test_contracts
       - save_cache:
-          key: test-v1-{{ checksum "~/fingerprint_python.txt" }}-{{ checksum "requirements.txt" }}
+          key: test-contracts-v1-{{ checksum "~/fingerprint_python.txt" }}-{{ checksum "requirements.txt" }}
           paths:
             - ~/shielder/.nox
+            - ~/shielder/.mypy_cache
 
 
 workflows:
@@ -71,4 +89,5 @@ workflows:
   main:
     jobs:
       - lint
+      - mypy
       - test-contracts
