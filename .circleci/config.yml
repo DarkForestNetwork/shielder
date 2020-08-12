@@ -64,6 +64,23 @@ jobs:
           paths:
             - ~/shielder/.nox
 
+  prettier:
+    executor: py37
+    working_directory: ~/shielder
+    steps:
+      - checkout
+      - install-nox
+      - restore_cache:
+          key: prettier-v1-{{ checksum "~/fingerprint_python.txt" }}-{{ checksum "requirements.txt" }}
+      - run:
+          name: "Run prettier with nox"
+          command: |
+            nox -s prettier
+      - save_cache:
+          key: prettier-v1-{{ checksum "~/fingerprint_python.txt" }}-{{ checksum "requirements.txt" }}
+          paths:
+            - ~/shielder/.nox
+
   test-contracts:
     executor: py37
     working_directory: ~/shielder
@@ -90,4 +107,5 @@ workflows:
     jobs:
       - lint
       - mypy
+      - prettier
       - test-contracts
