@@ -97,7 +97,7 @@ func (app *ShielderApp) DeliverTx(req abcitypes.RequestDeliverTx) abcitypes.Resp
 }
 
 func (app *ShielderApp) deliverPublicKeyCommitment(pkc *shmsg.PublicKeyCommitment, sender common.Address) abcitypes.ResponseDeliverTx {
-	bk, _ := app.Batches[pkc.BatchIndex]
+	bk := app.Batches[pkc.BatchIndex]
 	err := bk.AddPublicKeyCommitment(PublicKeyCommitment{Sender: sender, Pubkey: pkc.Commitment})
 	if err != nil {
 		return abcitypes.ResponseDeliverTx{
