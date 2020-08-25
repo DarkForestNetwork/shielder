@@ -1,11 +1,13 @@
 package app
 
 import (
+	"crypto/ecdsa"
 	"encoding/base64"
 	"fmt"
 
 	"shielder/shuttermint/shmsg"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/tendermint/tendermint/abci/types"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/kv"
@@ -96,10 +98,21 @@ func (app *ShielderApp) DeliverTx(req abcitypes.RequestDeliverTx) abcitypes.Resp
 	return app.deliverMessage(msg, signer)
 }
 
+// encodePubkeyForEvent encodes the PublicKey as a string suitable for putting it into a tendermint
+// event, i.e. an utf-8 compatible string
+func encodePubkeyForEvent(pubkey *ecdsa.PublicKey) string {
+	return base64.RawURLEncoding.EncodeToString(crypto.FromECDSAPub(pubkey))
+}
+
 func (app *ShielderApp) deliverPublicKeyCommitment(pkc *shmsg.PublicKeyCommitment, sender common.Address) abcitypes.ResponseDeliverTx {
-	bk := app.Batches[pkc.BatchIndex]
+	bk, ok := app.Batches[pkc.BatchIndex]
+	if !ok {
+		bk.Config = &BatchConfig{Keypers: []common.Address{}, Threshhold: 2}
+	}
+	publicKeyBefore := bk.PublicKey
 	err := bk.AddPublicKeyCommitment(PublicKeyCommitment{Sender: sender, Pubkey: pkc.Commitment})
 	if err != nil {
+		fmt.Println("GOT ERROR", err)
 		return abcitypes.ResponseDeliverTx{
 			Code:   1,
 			Events: []types.Event{}}
@@ -108,14 +121,13 @@ func (app *ShielderApp) deliverPublicKeyCommitment(pkc *shmsg.PublicKeyCommitmen
 	app.Batches[pkc.BatchIndex] = bk
 
 	var events []types.Event
-	if len(bk.Commitments) == int(bk.Config.Threshhold) {
-		// we have reached the threshold
-		// for the fake key generation let's take the last key as public key for this batch
+	if publicKeyBefore == nil && bk.PublicKey != nil {
+		// we have generated a public key with this PublicKeyCommitment
 		events = append(events, types.Event{
 			Type: "shielder.pubkey-generated",
 			Attributes: []kv.Pair{
-				{Key: []byte("BatchIndex"), Value: []byte("XXX")},
-				{Key: []byte("Pubkey"), Value: []byte("XXX")}},
+				{Key: []byte("BatchIndex"), Value: []byte(fmt.Sprintf("%d", pkc.BatchIndex))},
+				{Key: []byte("Pubkey"), Value: []byte(encodePubkeyForEvent(bk.PublicKey))}},
 		})
 	}
 	return abcitypes.ResponseDeliverTx{
