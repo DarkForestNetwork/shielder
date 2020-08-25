@@ -101,9 +101,6 @@ func (ShielderApp) decodeTx(req abcitypes.RequestDeliverTx) (signer common.Addre
 		return
 	}
 
-	// XXX we need to check that the signer is allowed
-	fmt.Println("Signer:", signer.Hex())
-
 	msg, err = shmsg.GetMessage(signedMsg)
 
 	if err != nil {
