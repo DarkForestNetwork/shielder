@@ -26,9 +26,10 @@ func (app *ShielderApp) CheckTx(req abcitypes.RequestCheckTx) abcitypes.Response
 
 // NewShielderApp creates a new ShielderApp
 func NewShielderApp() *ShielderApp {
-	app := ShielderApp{Configs: []*BatchConfig{{}}}
-
-	return &app
+	return &ShielderApp{
+		Configs: []*BatchConfig{{}},
+		Batches: make(map[uint64]BatchKeys),
+	}
 }
 
 // getConfig returns the BatchConfig for the given batchIndex
