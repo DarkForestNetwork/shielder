@@ -185,7 +185,7 @@ func (app *ShielderApp) deliverSecretShare(ss *shmsg.SecretShare, sender common.
 	if privateKeyBefore == nil && bk.PrivateKey != nil {
 		// we have generated a public key with this PublicKeyCommitment
 		events = append(events, types.Event{
-			Type: "shielder.pubkey-generated",
+			Type: "shielder.privkey-generated",
 			Attributes: []kv.Pair{
 				{Key: []byte("BatchIndex"), Value: []byte(fmt.Sprintf("%d", ss.BatchIndex))},
 				{Key: []byte("Privkey"), Value: []byte(encodePrivkeyForEvent(bk.PrivateKey))}},
