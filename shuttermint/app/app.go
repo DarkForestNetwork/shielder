@@ -120,6 +120,7 @@ func (app *ShielderApp) DeliverTx(req abcitypes.RequestDeliverTx) abcitypes.Resp
 		fmt.Println("Error while decoding transaction:", err)
 		return abcitypes.ResponseDeliverTx{
 			Code:   1,
+			Log:    fmt.Sprintf("Error while decoding transaction: %s", err),
 			Events: []types.Event{}}
 	}
 	return app.deliverMessage(msg, signer)
@@ -151,6 +152,7 @@ func (app *ShielderApp) deliverPublicKeyCommitment(pkc *shmsg.PublicKeyCommitmen
 		fmt.Println("GOT ERROR", err)
 		return abcitypes.ResponseDeliverTx{
 			Code:   1,
+			Log:    fmt.Sprintf("Error in AddPublicKeyCommitment: %s", err),
 			Events: []types.Event{}}
 
 	}
@@ -179,6 +181,7 @@ func (app *ShielderApp) deliverSecretShare(ss *shmsg.SecretShare, sender common.
 		fmt.Println("GOT ERROR", err)
 		return abcitypes.ResponseDeliverTx{
 			Code:   1,
+			Log:    fmt.Sprintf("Error in AddSecretShare: %s", err),
 			Events: []types.Event{}}
 	}
 	app.Batches[ss.BatchIndex] = bk
@@ -221,6 +224,7 @@ func (app *ShielderApp) deliverBatchConfig(msg *shmsg.BatchConfig, sender common
 	err := app.addConfig(bc)
 	if err != nil {
 		return abcitypes.ResponseDeliverTx{
+			Log:    fmt.Sprintf("Error in addConfig: %s", err),
 			Code:   1,
 			Events: []types.Event{}}
 	}
