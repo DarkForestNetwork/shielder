@@ -32,7 +32,6 @@ type BatchParams struct {
 type Keyper struct {
 	SigningKey          *ecdsa.PrivateKey
 	ShielderURL      string
-	events              chan IEvent
 	mux                 sync.Mutex
 	batchIndexToChannel map[uint64]chan IEvent
 	txs                 <-chan coretypes.ResultEvent
