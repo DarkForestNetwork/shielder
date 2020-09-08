@@ -12,9 +12,9 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "shuttermint",
-	Short: "shuttermint runs the shielder tendermint app or a shielder keyper",
-	Long:  `This should become a long description of what shielder is`,
+	Use:     "shuttermint",
+	Short:   "shuttermint runs the shielder tendermint app or a shielder keyper",
+	Version: version,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
