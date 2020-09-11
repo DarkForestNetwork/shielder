@@ -4,11 +4,12 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"shielder/shuttermint/shmsg"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/kv"
+
+	"shielder/shuttermint/shmsg"
 )
 
 func TestNewShielderApp(t *testing.T) {

@@ -9,10 +9,11 @@ import (
 	"log"
 	"math/big"
 
-	"shielder/shuttermint/contract"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+
+	"shielder/shuttermint/contract"
 )
 
 const (

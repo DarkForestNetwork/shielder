@@ -5,9 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"shielder/shuttermint/shmsg"
 	"github.com/ethereum/go-ethereum/common"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
+
+	"shielder/shuttermint/shmsg"
 )
 
 // Visit https://github.com/tendermint/spec/blob/master/spec/abci/abci.md for more information on

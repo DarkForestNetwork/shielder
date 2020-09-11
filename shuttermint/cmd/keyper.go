@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 
-	"shielder/shuttermint/keyper"
 	"github.com/ethereum/go-ethereum/crypto"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"shielder/shuttermint/keyper"
 )
 
 type KeyperConfig struct {

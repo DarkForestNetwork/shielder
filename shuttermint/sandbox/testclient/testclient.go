@@ -7,15 +7,15 @@ import (
 	"log"
 	"time"
 
-	"shielder/shuttermint/keyper"
-	"shielder/shuttermint/shmsg"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/kr/pretty"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/rpc/client"
 	"github.com/tendermint/tendermint/rpc/client/http"
-
 	"github.com/tendermint/tendermint/types"
+
+	"shielder/shuttermint/keyper"
+	"shielder/shuttermint/shmsg"
 )
 
 var version string = "(unknown)"

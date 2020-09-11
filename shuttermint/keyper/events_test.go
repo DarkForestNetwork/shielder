@@ -4,10 +4,11 @@ import (
 	"math/big"
 	"testing"
 
-	"shielder/shuttermint/app"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
+
+	"shielder/shuttermint/app"
 )
 
 func TestMakeEventPrivkeyGenerated(t *testing.T) {

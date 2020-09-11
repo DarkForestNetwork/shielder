@@ -5,9 +5,10 @@ import (
 	"log"
 	"time"
 
-	"shielder/shuttermint/shmsg"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+
+	"shielder/shuttermint/shmsg"
 )
 
 // SleepUntil pauses the current goroutine until the given time is reached
