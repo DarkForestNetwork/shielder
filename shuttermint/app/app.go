@@ -108,7 +108,6 @@ func (ShielderApp) decodeTx(req abcitypes.RequestDeliverTx) (signer common.Addre
 
 func (app *ShielderApp) DeliverTx(req abcitypes.RequestDeliverTx) abcitypes.ResponseDeliverTx {
 	signer, msg, err := app.decodeTx(req)
-
 	if err != nil {
 		fmt.Println("Error while decoding transaction:", err)
 		return makeErrorResponse(fmt.Sprintf("Error while decoding transaction: %s", err))
@@ -120,7 +119,8 @@ func makeErrorResponse(msg string) abcitypes.ResponseDeliverTx {
 	return abcitypes.ResponseDeliverTx{
 		Code:   1,
 		Log:    msg,
-		Events: []abcitypes.Event{}}
+		Events: []abcitypes.Event{},
+	}
 }
 
 func (app *ShielderApp) deliverPublicKeyCommitment(pkc *shmsg.PublicKeyCommitment, sender common.Address) abcitypes.ResponseDeliverTx {
@@ -140,7 +140,8 @@ func (app *ShielderApp) deliverPublicKeyCommitment(pkc *shmsg.PublicKeyCommitmen
 	}
 	return abcitypes.ResponseDeliverTx{
 		Code:   0,
-		Events: events}
+		Events: events,
+	}
 }
 
 func (app *ShielderApp) deliverSecretShare(ss *shmsg.SecretShare, sender common.Address) abcitypes.ResponseDeliverTx {
@@ -159,8 +160,8 @@ func (app *ShielderApp) deliverSecretShare(ss *shmsg.SecretShare, sender common.
 	}
 	return abcitypes.ResponseDeliverTx{
 		Code:   0,
-		Events: events}
-
+		Events: events,
+	}
 }
 
 func (app *ShielderApp) deliverBatchConfig(msg *shmsg.BatchConfig, sender common.Address) abcitypes.ResponseDeliverTx {
@@ -184,7 +185,8 @@ func (app *ShielderApp) deliverBatchConfig(msg *shmsg.BatchConfig, sender common
 	events = append(events, MakeBatchConfigEvent(bc.StartBatchIndex, bc.Threshold, keypers))
 	return abcitypes.ResponseDeliverTx{
 		Code:   0,
-		Events: events}
+		Events: events,
+	}
 }
 
 func (app *ShielderApp) deliverEncryptionKeyAttestation(msg *shmsg.EncryptionKeyAttestation, sender common.Address) abcitypes.ResponseDeliverTx {
@@ -220,7 +222,8 @@ func (app *ShielderApp) deliverMessage(msg *shmsg.Message, sender common.Address
 	}
 	return abcitypes.ResponseDeliverTx{
 		Code:   0,
-		Events: []abcitypes.Event{}}
+		Events: []abcitypes.Event{},
+	}
 }
 
 func (ShielderApp) EndBlock(req abcitypes.RequestEndBlock) abcitypes.ResponseEndBlock {
