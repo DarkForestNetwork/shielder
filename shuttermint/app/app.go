@@ -82,7 +82,6 @@ func (ShielderApp) InitChain(req abcitypes.RequestInitChain) abcitypes.ResponseI
 }
 
 func (ShielderApp) BeginBlock(req abcitypes.RequestBeginBlock) abcitypes.ResponseBeginBlock {
-	// fmt.Println("BEGIN", req.GetHash(), req.Header.GetChainID(), req.Header.GetTime())
 	return abcitypes.ResponseBeginBlock{}
 }
 
@@ -108,8 +107,6 @@ func (ShielderApp) decodeTx(req abcitypes.RequestDeliverTx) (signer common.Addre
 }
 
 func (app *ShielderApp) DeliverTx(req abcitypes.RequestDeliverTx) abcitypes.ResponseDeliverTx {
-	// signedTransaction := make([]byte,  base64.RawURLEncoding.DecodedLen(len(req.Tx)))
-
 	signer, msg, err := app.decodeTx(req)
 
 	if err != nil {
@@ -227,12 +224,10 @@ func (app *ShielderApp) deliverMessage(msg *shmsg.Message, sender common.Address
 }
 
 func (ShielderApp) EndBlock(req abcitypes.RequestEndBlock) abcitypes.ResponseEndBlock {
-	// fmt.Println("END BLOCK", req.Height)
 	return abcitypes.ResponseEndBlock{}
 }
 
 func (app *ShielderApp) Commit() abcitypes.ResponseCommit {
-	// fmt.Printf("COMMIT %#v", app.games)
 	return abcitypes.ResponseCommit{}
 }
 
