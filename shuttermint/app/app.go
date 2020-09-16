@@ -234,7 +234,3 @@ func (ShielderApp) EndBlock(req abcitypes.RequestEndBlock) abcitypes.ResponseEnd
 func (app *ShielderApp) Commit() abcitypes.ResponseCommit {
 	return abcitypes.ResponseCommit{}
 }
-
-func (ShielderApp) Query(req abcitypes.RequestQuery) abcitypes.ResponseQuery {
-	return abcitypes.ResponseQuery{Code: 0}
-}
