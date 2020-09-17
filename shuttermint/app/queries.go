@@ -24,7 +24,7 @@ func (app *ShielderApp) Query(req abcitypes.RequestQuery) abcitypes.ResponseQuer
 		return makeQueryErrorResponse("invalid request url")
 	}
 
-	if requestURL.Path == "/configs/" {
+	if requestURL.Path == "/configs" {
 		return app.queryBatchConfig(requestURL.Query())
 	}
 	return makeQueryErrorResponse("unknown method")
