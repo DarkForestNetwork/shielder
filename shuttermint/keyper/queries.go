@@ -1,17 +1,20 @@
 package keyper
 
-import "fmt"
-import tmbytes "github.com/tendermint/tendermint/libs/bytes"
-import "github.com/golang/protobuf/proto"
-import "github.com/tendermint/tendermint/rpc/client"
-import "shielder/shuttermint/app"
-import "shielder/shuttermint/shmsg"
+import (
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	tmbytes "github.com/tendermint/tendermint/libs/bytes"
+	"github.com/tendermint/tendermint/rpc/client"
+
+	"shielder/shuttermint/app"
+	"shielder/shuttermint/shmsg"
+)
 
 func queryBatchConfig(cl client.Client, batchIndex uint64) (app.BatchConfig, error) {
 	path := fmt.Sprintf("/configs?batchIndex=%d", batchIndex)
 	data := tmbytes.HexBytes([]byte{})
 	res, err := cl.ABCIQuery(path, data)
-
 	if err != nil {
 		return app.BatchConfig{}, err
 	}
