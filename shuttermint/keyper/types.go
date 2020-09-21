@@ -53,9 +53,12 @@ type BatchState struct {
 
 // KeyperConfig contains validated configuration parameters for the keyper client
 type KeyperConfig struct {
-	ShielderURL string
-	EthereumURL    string
-	SigningKey     *ecdsa.PrivateKey
+	ShielderURL                 string
+	EthereumURL                    string
+	SigningKey                     *ecdsa.PrivateKey
+	ConfigContractAddress          common.Address
+	BatcherContractAddress         common.Address
+	KeyBroadcastingContractAddress common.Address
 }
 
 // Keyper is used to run the keyper key generation
