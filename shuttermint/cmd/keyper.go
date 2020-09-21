@@ -87,8 +87,8 @@ func keyperMain() {
 		kc.ShielderURL,
 		kc.EthereumURL,
 	)
-	k := keyper.NewKeyper(privateKey, kc.ShielderURL, kc.EthereumURL)
-	err = k.Run()
+	kpr := keyper.NewKeyper(privateKey, kc.ShielderURL, kc.EthereumURL)
+	err = kpr.Run()
 	if err != nil {
 		panic(err)
 	}
