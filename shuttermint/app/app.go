@@ -280,7 +280,10 @@ func (app *ShielderApp) deliverBatchConfig(msg *shmsg.BatchConfig, sender common
 	}
 }
 
-func (app *ShielderApp) deliverEncryptionKeyAttestation(msg *shmsg.EncryptionKeyAttestation, sender common.Address) abcitypes.ResponseDeliverTx {
+func (app *ShielderApp) deliverEncryptionKeyAttestation(
+	msg *shmsg.EncryptionKeyAttestation,
+	sender common.Address,
+) abcitypes.ResponseDeliverTx {
 	bs := app.getBatchState(msg.BatchIndex)
 	att := EncryptionKeyAttestation{
 		Sender:                sender,
