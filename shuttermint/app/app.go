@@ -50,6 +50,7 @@ func NewShielderApp() *ShielderApp {
 		Configs:     []*BatchConfig{{}},
 		BatchStates: make(map[uint64]BatchState),
 		Voting:      NewConfigVoting(),
+		Identities:  make(map[common.Address]ValidatorPubkey),
 	}
 }
 
