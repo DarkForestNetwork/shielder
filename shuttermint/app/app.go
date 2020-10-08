@@ -442,9 +442,11 @@ func (app *ShielderApp) deliverDecryptionSignature(msg *shmsg.DecryptionSignatur
 		return makeErrorResponse(msg)
 	}
 	app.BatchStates[msg.BatchIndex] = bs
+
+	event := MakeDecryptionSignatureEvent(msg.BatchIndex, sender, msg.Signature)
 	return abcitypes.ResponseDeliverTx{
 		Code:   0,
-		Events: []abcitypes.Event{},
+		Events: []abcitypes.Event{event},
 	}
 }
 
