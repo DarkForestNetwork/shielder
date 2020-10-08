@@ -456,6 +456,7 @@ func (app *ShielderApp) deliverMessage(msg *shmsg.Message, sender common.Address
 	return makeErrorResponse("cannot deliver message")
 }
 
+// LastConfig returns the config with the highest known index.
 func (app *ShielderApp) LastConfig() *BatchConfig {
 	if len(app.Configs) == 0 {
 		panic("internal error: app.Configs is empty")
