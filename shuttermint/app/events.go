@@ -19,18 +19,6 @@ import (
 	"github.com/tendermint/tendermint/libs/kv"
 )
 
-// MakePubkeyGeneratedEvent creates a 'shielder.pubkey-generated' tendermint event.  The given
-// BatchIndex and PublicKey are encoded as attributes of the event.
-func MakePubkeyGeneratedEvent(batchIndex uint64, pubkey *ecdsa.PublicKey) abcitypes.Event {
-	return abcitypes.Event{
-		Type: "shielder.pubkey-generated",
-		Attributes: []kv.Pair{
-			{Key: []byte("BatchIndex"), Value: []byte(fmt.Sprintf("%d", batchIndex))},
-			{Key: []byte("Pubkey"), Value: []byte(encodePubkeyForEvent(pubkey))},
-		},
-	}
-}
-
 // MakePrivkeyGeneratedEvent creates a 'shielder.privkey-generated' tendermint event. The given
 // BatchIndex and PrivateKey are encoded as attributes of the event
 func MakePrivkeyGeneratedEvent(batchIndex uint64, privkey *ecdsa.PrivateKey) abcitypes.Event {
