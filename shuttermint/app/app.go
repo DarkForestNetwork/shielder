@@ -269,22 +269,6 @@ func notAKeyper(sender common.Address) abcitypes.ResponseDeliverTx {
 		"sender %s is not a keyper", sender.Hex()))
 }
 
-func (app *ShielderApp) deliverPublicKeyCommitment(pkc *shmsg.PublicKeyCommitment, sender common.Address) abcitypes.ResponseDeliverTx {
-	_ = pkc
-	_ = sender
-	msg := "received obsolete PublicKeyCommitment"
-	log.Print(msg)
-	return makeErrorResponse(msg)
-}
-
-func (app *ShielderApp) deliverSecretShare(ss *shmsg.SecretShare, sender common.Address) abcitypes.ResponseDeliverTx {
-	_ = ss
-	_ = sender
-	msg := "received obsolete SecretShare"
-	log.Print(msg)
-	return makeErrorResponse(msg)
-}
-
 func (app *ShielderApp) allowedToVoteOnConfigChanges(sender common.Address) bool {
 	lastConfig := app.LastConfig()
 	_, ok := lastConfig.KeyperIndex(sender)
@@ -545,12 +529,6 @@ func (app *ShielderApp) handleApologyMsg(msg *shmsg.ApologyMsg, sender common.Ad
 }
 
 func (app *ShielderApp) deliverMessage(msg *shmsg.Message, sender common.Address) abcitypes.ResponseDeliverTx {
-	if msg.GetPublicKeyCommitment() != nil {
-		return app.deliverPublicKeyCommitment(msg.GetPublicKeyCommitment(), sender)
-	}
-	if msg.GetSecretShare() != nil {
-		return app.deliverSecretShare(msg.GetSecretShare(), sender)
-	}
 	if msg.GetBatchConfig() != nil {
 		return app.deliverBatchConfig(msg.GetBatchConfig(), sender)
 	}
