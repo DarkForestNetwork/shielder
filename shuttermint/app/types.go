@@ -119,6 +119,7 @@ type ShielderApp struct {
 	DevMode         bool
 	CheckTxState    *CheckTxState
 	NonceTracker    *NonceTracker
+	ChainID         string
 }
 
 // CheckTxState is a part of the state used by CheckTx calls that is reset at every commit.

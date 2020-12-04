@@ -56,6 +56,9 @@ func (app *ShielderApp) CheckTx(req abcitypes.RequestCheckTx) abcitypes.Response
 	if err != nil {
 		return abcitypes.ResponseCheckTx{Code: 1}
 	}
+	if string(msg.ChainId) != app.ChainID {
+		return abcitypes.ResponseCheckTx{Code: 1}
+	}
 	if !app.NonceTracker.Check(signer, msg.RandomNonce) {
 		return abcitypes.ResponseCheckTx{Code: 1}
 	}
@@ -77,6 +80,7 @@ func NewShielderApp() *ShielderApp {
 		StartedVotes:    make(map[common.Address]bool),
 		CheckTxState:    NewCheckTxState(),
 		NonceTracker:    NewNonceTracker(),
+		ChainID:         "", // will be set in InitChain
 	}
 }
 
@@ -247,6 +251,9 @@ func (app *ShielderApp) InitChain(req abcitypes.RequestInitChain) abcitypes.Resp
 	} else if !reflect.DeepEqual(bc, *app.Configs[0]) {
 		log.Fatalf("Mismatch between stored app state and initial app state, stored=%+v initial=%+v", app.Configs[0], bc)
 	}
+
+	app.ChainID = req.ChainId
+
 	return abcitypes.ResponseInitChain{}
 }
 
@@ -281,6 +288,9 @@ func (app *ShielderApp) DeliverTx(req abcitypes.RequestDeliverTx) abcitypes.Resp
 		msg := fmt.Sprintf("Error while decoding transaction: %s", err)
 		log.Print(msg)
 		return makeErrorResponse(msg)
+	}
+	if string(msg.ChainId) != app.ChainID {
+		return makeErrorResponse(fmt.Sprintf("wrong chain id (expected %s, got %s)", app.ChainID, msg.ChainId))
 	}
 	if !app.NonceTracker.Check(signer, msg.RandomNonce) {
 		msg := fmt.Sprintf("Nonce %d of %s already used", msg.RandomNonce, signer.Hex())
