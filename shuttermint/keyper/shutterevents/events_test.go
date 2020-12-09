@@ -1,4 +1,4 @@
-package keyper
+package shielderevents
 
 import (
 	"crypto/rand"

@@ -12,6 +12,7 @@ import (
 
 	"shielder/shuttermint/contract"
 	"shielder/shuttermint/keyper/puredkg"
+	"shielder/shuttermint/keyper/shielderevents"
 	"shielder/shuttermint/shmsg"
 )
 
@@ -141,9 +142,9 @@ func (dkg *DKGInstance) sendPolyEvals(ctx context.Context, polyEvals []puredkg.P
 	return nil
 }
 
-func (dkg *DKGInstance) dispatchShielderEvent(ev IEvent) {
+func (dkg *DKGInstance) dispatchShielderEvent(ev shielderevents.IEvent) {
 	switch e := ev.(type) {
-	case PolyCommitmentRegisteredEvent:
+	case shielderevents.PolyCommitmentRegisteredEvent:
 		senderIndex, err := dkg.FindKeyperIndex(e.Sender)
 		if err != nil {
 			log.Printf("Could not handle poly commitment message. sender is not a keyper")
@@ -159,7 +160,7 @@ func (dkg *DKGInstance) dispatchShielderEvent(ev IEvent) {
 			log.Printf("Could not handle poly commitment message: %+v %s", m, err)
 			return
 		}
-	case PolyEvalRegisteredEvent:
+	case shielderevents.PolyEvalRegisteredEvent:
 		senderIndex, err := dkg.FindKeyperIndex(e.Sender)
 		if err != nil {
 			log.Printf("Could not handle poly eval message. sender is not a keyper")

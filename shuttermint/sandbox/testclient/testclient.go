@@ -15,7 +15,7 @@ import (
 	"github.com/tendermint/tendermint/rpc/client/http"
 	"github.com/tendermint/tendermint/types"
 
-	"shielder/shuttermint/keyper"
+	"shielder/shuttermint/keyper/shielderevents"
 	"shielder/shuttermint/shmsg"
 )
 
@@ -38,7 +38,7 @@ func makeMessage() *shmsg.MessageWithNonce {
 
 func printEvents(events []abcitypes.Event) {
 	for _, ev := range events {
-		x, err := keyper.MakeEvent(ev)
+		x, err := shielderevents.MakeEvent(ev)
 		if err != nil {
 			fmt.Println(err)
 		} else {

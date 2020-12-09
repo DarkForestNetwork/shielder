@@ -14,6 +14,7 @@ import (
 
 	"shielder/shuttermint/contract"
 	shcrypto "shielder/shuttermint/crypto"
+	"shielder/shuttermint/keyper/shielderevents"
 )
 
 type testInstance struct {
@@ -127,7 +128,7 @@ func TestDispatchPolyCommitmentRegistered(t *testing.T) {
 	sender := ti.keypers[senderIndex]
 	polynomial, err := shcrypto.RandomPolynomial(rand.Reader, shcrypto.DegreeFromThreshold(ti.dkg.pure.Threshold))
 	require.Nil(t, err)
-	ev := PolyCommitmentRegisteredEvent{
+	ev := shielderevents.PolyCommitmentRegisteredEvent{
 		Eon:    ti.eon,
 		Sender: sender,
 		Gammas: polynomial.Gammas(),
