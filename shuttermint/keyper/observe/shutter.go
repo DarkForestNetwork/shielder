@@ -2,6 +2,7 @@ package observe
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -14,6 +15,8 @@ import (
 	"shielder/shuttermint/medley"
 )
 
+var errEonNotFound = errors.New("eon not found")
+
 // Shielder let's a keyper fetch all necessary information from a shuttermint node. The only source
 // for the data stored in this struct should be the shielder node.  The SyncToHead method can be
 // used to update the data. All other accesses should be read-only.
@@ -22,6 +25,7 @@ type Shielder struct {
 	KeyperEncryptionKeys map[common.Address]*ecies.PublicKey
 	BatchConfigs         []shielderevents.BatchConfigEvent
 	Batches              map[uint64]*Batch
+	Eons                 []Eon
 }
 
 // NewShielder creates an empty Shielder struct
@@ -31,6 +35,13 @@ func NewShielder() *Shielder {
 		KeyperEncryptionKeys: make(map[common.Address]*ecies.PublicKey),
 		Batches:              make(map[uint64]*Batch),
 	}
+}
+
+type Eon struct {
+	Eon         uint64
+	StartEvent  shielderevents.EonStartedEvent
+	Commitments []shielderevents.PolyCommitmentRegisteredEvent
+	PolyEvals   []shielderevents.PolyEvalRegisteredEvent
 }
 
 type Batch struct {
@@ -58,6 +69,15 @@ func (shielder *Shielder) getBatch(batchIndex uint64) *Batch {
 	return b
 }
 
+func (shielder *Shielder) findEon(eon uint64) (*Eon, error) {
+	for i := 0; i < len(shielder.Eons); i++ {
+		if shielder.Eons[i].Eon == eon {
+			return &shielder.Eons[i], nil
+		}
+	}
+	return nil, errEonNotFound
+}
+
 func (shielder *Shielder) applyEvent(ev shielderevents.IEvent) {
 	warn := func() {
 		fmt.Printf("XXX observing event not yet implemented: %s%+v\n", reflect.TypeOf(ev), ev)
@@ -71,11 +91,23 @@ func (shielder *Shielder) applyEvent(ev shielderevents.IEvent) {
 		b := shielder.getBatch(e.BatchIndex)
 		b.DecryptionSignatures = append(b.DecryptionSignatures, e)
 	case shielderevents.EonStartedEvent:
-		warn() // TODO
+		_, err := shielder.findEon(e.Eon)
+		if err == nil {
+			panic("duplicate EonStartedEvent received")
+		}
+		shielder.Eons = append(shielder.Eons, Eon{Eon: e.Eon, StartEvent: e})
 	case shielderevents.PolyCommitmentRegisteredEvent:
-		warn() // TODO
+		eon, err := shielder.findEon(e.Eon)
+		if err != nil {
+			panic(err) // XXX we should remove that later
+		}
+		eon.Commitments = append(eon.Commitments, e)
 	case shielderevents.PolyEvalRegisteredEvent:
-		warn() // TODO
+		eon, err := shielder.findEon(e.Eon)
+		if err != nil {
+			panic(err) // XXX we should remove that later
+		}
+		eon.PolyEvals = append(eon.PolyEvals, e)
 	default:
 		warn()
 		panic("applyEvent: unknown event. giving up")
@@ -122,6 +154,15 @@ func (shielder *Shielder) IsKeyper(addr common.Address) bool {
 		}
 	}
 	return false
+}
+
+func (shielder *Shielder) FindBatchConfigByBatchIndex(batchIndex uint64) shielderevents.BatchConfigEvent {
+	for i := len(shielder.BatchConfigs); i > 0; i++ {
+		if shielder.BatchConfigs[i-1].StartBatchIndex <= batchIndex {
+			return shielder.BatchConfigs[i-1]
+		}
+	}
+	return shielderevents.BatchConfigEvent{}
 }
 
 // SyncToHead syncs the state with the remote state. It fetches events from new blocks since the
