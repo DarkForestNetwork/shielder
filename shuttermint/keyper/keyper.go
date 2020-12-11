@@ -752,7 +752,7 @@ func (kpr *Keyper) dispatchEvent(ev shielderevents.IEvent) {
 	case shielderevents.CheckInEvent:
 		kpr.handleCheckInEvent(e)
 	case shielderevents.BatchConfigEvent:
-		kpr.sendEonStartVote(e.StartBatchIndex)
+		// kpr.sendEonStartVote(e.StartBatchIndex)
 	case shielderevents.DecryptionSignatureEvent:
 		kpr.dispatchEventToBatch(e.BatchIndex, e)
 	case shielderevents.EonStartedEvent:
