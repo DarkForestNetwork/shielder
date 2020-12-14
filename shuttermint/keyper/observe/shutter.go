@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto/ecies"
@@ -69,13 +70,21 @@ func (shielder *Shielder) getBatch(batchIndex uint64) *Batch {
 	return b
 }
 
-func (shielder *Shielder) findEon(eon uint64) (*Eon, error) {
-	for i := 0; i < len(shielder.Eons); i++ {
-		if shielder.Eons[i].Eon == eon {
-			return &shielder.Eons[i], nil
-		}
+func (shielder *Shielder) searchEon(eon uint64) int {
+	return sort.Search(
+		len(shielder.Eons),
+		func(i int) bool {
+			return eon <= shielder.Eons[i].Eon
+		},
+	)
+}
+
+func (shielder *Shielder) FindEon(eon uint64) (*Eon, error) {
+	idx := shielder.searchEon(eon)
+	if idx == len(shielder.Eons) || eon < shielder.Eons[idx].Eon {
+		return nil, errEonNotFound
 	}
-	return nil, errEonNotFound
+	return &shielder.Eons[idx], nil
 }
 
 func (shielder *Shielder) applyEvent(ev shielderevents.IEvent) {
@@ -91,19 +100,19 @@ func (shielder *Shielder) applyEvent(ev shielderevents.IEvent) {
 		b := shielder.getBatch(e.BatchIndex)
 		b.DecryptionSignatures = append(b.DecryptionSignatures, e)
 	case shielderevents.EonStartedEvent:
-		_, err := shielder.findEon(e.Eon)
-		if err == nil {
-			panic("duplicate EonStartedEvent received")
+		idx := shielder.searchEon(e.Eon)
+		if idx < len(shielder.Eons) {
+			panic("eons should increase")
 		}
 		shielder.Eons = append(shielder.Eons, Eon{Eon: e.Eon, StartEvent: e})
 	case shielderevents.PolyCommitmentRegisteredEvent:
-		eon, err := shielder.findEon(e.Eon)
+		eon, err := shielder.FindEon(e.Eon)
 		if err != nil {
 			panic(err) // XXX we should remove that later
 		}
 		eon.Commitments = append(eon.Commitments, e)
 	case shielderevents.PolyEvalRegisteredEvent:
-		eon, err := shielder.findEon(e.Eon)
+		eon, err := shielder.FindEon(e.Eon)
 		if err != nil {
 			panic(err) // XXX we should remove that later
 		}
