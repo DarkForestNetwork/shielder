@@ -40,6 +40,7 @@ func NewShielder() *Shielder {
 
 type Eon struct {
 	Eon         uint64
+	StartHeight int64
 	StartEvent  shielderevents.EonStartedEvent
 	Commitments []shielderevents.PolyCommitmentRegisteredEvent
 	PolyEvals   []shielderevents.PolyEvalRegisteredEvent
@@ -50,13 +51,13 @@ type Batch struct {
 	DecryptionSignatures []shielderevents.DecryptionSignatureEvent
 }
 
-func (shielder *Shielder) applyTxEvents(events []abcitypes.Event) {
+func (shielder *Shielder) applyTxEvents(height int64, events []abcitypes.Event) {
 	for _, ev := range events {
 		x, err := shielderevents.MakeEvent(ev)
 		if err != nil {
 			fmt.Printf("malformed event: %+v", x)
 		} else {
-			shielder.applyEvent(x)
+			shielder.applyEvent(height, x)
 		}
 	}
 }
@@ -87,7 +88,7 @@ func (shielder *Shielder) FindEon(eon uint64) (*Eon, error) {
 	return &shielder.Eons[idx], nil
 }
 
-func (shielder *Shielder) applyEvent(ev shielderevents.IEvent) {
+func (shielder *Shielder) applyEvent(height int64, ev shielderevents.IEvent) {
 	warn := func() {
 		fmt.Printf("XXX observing event not yet implemented: %s%+v\n", reflect.TypeOf(ev), ev)
 	}
@@ -104,7 +105,7 @@ func (shielder *Shielder) applyEvent(ev shielderevents.IEvent) {
 		if idx < len(shielder.Eons) {
 			panic("eons should increase")
 		}
-		shielder.Eons = append(shielder.Eons, Eon{Eon: e.Eon, StartEvent: e})
+		shielder.Eons = append(shielder.Eons, Eon{Eon: e.Eon, StartEvent: e, StartHeight: height})
 	case shielderevents.PolyCommitmentRegisteredEvent:
 		eon, err := shielder.FindEon(e.Eon)
 		if err != nil {
@@ -138,7 +139,7 @@ func (shielder *Shielder) fetchAndApplyEvents(ctx context.Context, shmcl client.
 		}
 		for _, tx := range res.Txs {
 			events := tx.TxResult.GetEvents()
-			shielder.applyTxEvents(events)
+			shielder.applyTxEvents(tx.Height, events)
 		}
 		if page*perPage > res.TotalCount {
 			break
