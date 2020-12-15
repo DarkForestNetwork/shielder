@@ -32,7 +32,7 @@ func NewBatchState(
 	cipherExecutionParams chan CipherExecutionParams,
 ) BatchState {
 	numKeypers := len(bp.BatchConfig.Keypers)
-	decryptionSignatureAdded := make(chan shielderevents.DecryptionSignatureEvent, numKeypers)
+	decryptionSignatureAdded := make(chan shielderevents.DecryptionSignature, numKeypers)
 	return BatchState{
 		BatchParams:               bp,
 		KeyperConfig:              kc,
@@ -48,7 +48,7 @@ func NewBatchState(
 
 func (batch *BatchState) dispatchShielderEvent(ev shielderevents.IEvent) {
 	switch e := ev.(type) {
-	case shielderevents.DecryptionSignatureEvent:
+	case shielderevents.DecryptionSignature:
 		select {
 		case batch.decryptionSignatureAdded <- e:
 		default:
@@ -63,8 +63,8 @@ func (batch *BatchState) collectDecryptionSignatureEvents(
 	cipherBatchHash common.Hash,
 	decryptionKey *ecdsa.PrivateKey,
 	batchHash common.Hash,
-) ([]shielderevents.DecryptionSignatureEvent, error) {
-	events := []shielderevents.DecryptionSignatureEvent{}
+) ([]shielderevents.DecryptionSignature, error) {
+	events := []shielderevents.DecryptionSignature{}
 	for {
 		select {
 		case ev := <-batch.decryptionSignatureAdded:
@@ -219,7 +219,7 @@ func (batch *BatchState) KeyperAddress() common.Address {
 	return crypto.PubkeyToAddress(batch.KeyperConfig.SigningKey.PublicKey)
 }
 
-func (batch *BatchState) signerIndicesAndSignaturesFromEvents(events []shielderevents.DecryptionSignatureEvent) ([]uint64, [][]byte, error) {
+func (batch *BatchState) signerIndicesAndSignaturesFromEvents(events []shielderevents.DecryptionSignature) ([]uint64, [][]byte, error) {
 	sliceIndices := []uint64{}
 	signerIndices := []uint64{}
 	signatures := [][]byte{}

@@ -133,7 +133,7 @@ func (dkg *DKGInstance) sendPolyEvals(ctx context.Context, polyEvals []puredkg.P
 
 func (dkg *DKGInstance) dispatchShielderEvent(ev shielderevents.IEvent) {
 	switch e := ev.(type) {
-	case shielderevents.PolyCommitmentRegisteredEvent:
+	case shielderevents.PolyCommitment:
 		senderIndex, err := dkg.FindKeyperIndex(e.Sender)
 		if err != nil {
 			log.Printf("Could not handle poly commitment message. sender is not a keyper")
@@ -149,7 +149,7 @@ func (dkg *DKGInstance) dispatchShielderEvent(ev shielderevents.IEvent) {
 			log.Printf("Could not handle poly commitment message: %+v %s", m, err)
 			return
 		}
-	case shielderevents.PolyEvalRegisteredEvent:
+	case shielderevents.PolyEval:
 		senderIndex, err := dkg.FindKeyperIndex(e.Sender)
 		if err != nil {
 			log.Printf("Could not handle poly eval message. sender is not a keyper")

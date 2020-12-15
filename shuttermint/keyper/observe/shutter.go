@@ -24,7 +24,7 @@ var errEonNotFound = errors.New("eon not found")
 type Shielder struct {
 	CurrentBlock         int64
 	KeyperEncryptionKeys map[common.Address]*ecies.PublicKey
-	BatchConfigs         []shielderevents.BatchConfigEvent
+	BatchConfigs         []shielderevents.BatchConfig
 	Batches              map[uint64]*Batch
 	Eons                 []Eon
 }
@@ -41,14 +41,14 @@ func NewShielder() *Shielder {
 type Eon struct {
 	Eon         uint64
 	StartHeight int64
-	StartEvent  shielderevents.EonStartedEvent
-	Commitments []shielderevents.PolyCommitmentRegisteredEvent
-	PolyEvals   []shielderevents.PolyEvalRegisteredEvent
+	StartEvent  shielderevents.EonStarted
+	Commitments []shielderevents.PolyCommitment
+	PolyEvals   []shielderevents.PolyEval
 }
 
 type Batch struct {
 	BatchIndex           uint64
-	DecryptionSignatures []shielderevents.DecryptionSignatureEvent
+	DecryptionSignatures []shielderevents.DecryptionSignature
 }
 
 func (shielder *Shielder) applyTxEvents(height int64, events []abcitypes.Event) {
@@ -93,26 +93,26 @@ func (shielder *Shielder) applyEvent(height int64, ev shielderevents.IEvent) {
 		fmt.Printf("XXX observing event not yet implemented: %s%+v\n", reflect.TypeOf(ev), ev)
 	}
 	switch e := ev.(type) {
-	case shielderevents.CheckInEvent:
+	case shielderevents.CheckIn:
 		shielder.KeyperEncryptionKeys[e.Sender] = e.EncryptionPublicKey
-	case shielderevents.BatchConfigEvent:
+	case shielderevents.BatchConfig:
 		shielder.BatchConfigs = append(shielder.BatchConfigs, e)
-	case shielderevents.DecryptionSignatureEvent:
+	case shielderevents.DecryptionSignature:
 		b := shielder.getBatch(e.BatchIndex)
 		b.DecryptionSignatures = append(b.DecryptionSignatures, e)
-	case shielderevents.EonStartedEvent:
+	case shielderevents.EonStarted:
 		idx := shielder.searchEon(e.Eon)
 		if idx < len(shielder.Eons) {
 			panic("eons should increase")
 		}
 		shielder.Eons = append(shielder.Eons, Eon{Eon: e.Eon, StartEvent: e, StartHeight: height})
-	case shielderevents.PolyCommitmentRegisteredEvent:
+	case shielderevents.PolyCommitment:
 		eon, err := shielder.FindEon(e.Eon)
 		if err != nil {
 			panic(err) // XXX we should remove that later
 		}
 		eon.Commitments = append(eon.Commitments, e)
-	case shielderevents.PolyEvalRegisteredEvent:
+	case shielderevents.PolyEval:
 		eon, err := shielder.FindEon(e.Eon)
 		if err != nil {
 			panic(err) // XXX we should remove that later
@@ -166,13 +166,13 @@ func (shielder *Shielder) IsKeyper(addr common.Address) bool {
 	return false
 }
 
-func (shielder *Shielder) FindBatchConfigByBatchIndex(batchIndex uint64) shielderevents.BatchConfigEvent {
+func (shielder *Shielder) FindBatchConfigByBatchIndex(batchIndex uint64) shielderevents.BatchConfig {
 	for i := len(shielder.BatchConfigs); i > 0; i++ {
 		if shielder.BatchConfigs[i-1].StartBatchIndex <= batchIndex {
 			return shielder.BatchConfigs[i-1]
 		}
 	}
-	return shielderevents.BatchConfigEvent{}
+	return shielderevents.BatchConfig{}
 }
 
 // SyncToHead syncs the state with the remote state. It fetches events from new blocks since the

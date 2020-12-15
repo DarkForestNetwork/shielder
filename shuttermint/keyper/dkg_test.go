@@ -128,7 +128,7 @@ func TestDispatchPolyCommitmentRegistered(t *testing.T) {
 	sender := ti.keypers[senderIndex]
 	polynomial, err := shcrypto.RandomPolynomial(rand.Reader, shcrypto.DegreeFromThreshold(ti.dkg.pure.Threshold))
 	require.Nil(t, err)
-	ev := shielderevents.PolyCommitmentRegisteredEvent{
+	ev := shielderevents.PolyCommitment{
 		Eon:    ti.eon,
 		Sender: sender,
 		Gammas: polynomial.Gammas(),
