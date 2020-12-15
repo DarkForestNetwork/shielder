@@ -68,7 +68,7 @@ func (app *ShielderApp) queryBatchConfig(vs url.Values) abcitypes.ResponseQuery 
 	}
 
 	configMsg := config.Message()
-	configBytes, err := proto.Marshal(&configMsg)
+	configBytes, err := proto.Marshal(configMsg)
 	if err != nil {
 		return makeQueryErrorResponse("error encoding message")
 	}
@@ -122,7 +122,7 @@ func (app *ShielderApp) queryVote(vs url.Values) abcitypes.ResponseQuery {
 
 	config := app.ConfigVoting.Candidates[index]
 	configMsg := config.Message()
-	configBytes, err := proto.Marshal(&configMsg)
+	configBytes, err := proto.Marshal(configMsg)
 	if err != nil {
 		return makeQueryErrorResponse("error encoding message")
 	}
