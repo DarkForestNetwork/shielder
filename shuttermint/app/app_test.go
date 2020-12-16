@@ -100,7 +100,7 @@ func TestEncodePubkeyForEvent(t *testing.T) {
 	t.Logf("Encoded: %s", encoded)
 	require.True(t, utf8.ValidString(encoded))
 
-	decoded, err := shielderevents.DecodePubkeyFromEvent(encoded)
+	decoded, err := shielderevents.DecodePubkey(encoded)
 	require.Nil(t, err, "could not decode pubkey")
 	t.Logf("Decoded: %+v", decoded)
 	require.Equal(t, key.PublicKey, *decoded)
