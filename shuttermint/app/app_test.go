@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
 
+	"shielder/shuttermint/keyper/shielderevents"
 	"shielder/shuttermint/shmsg"
 )
 
@@ -99,7 +100,7 @@ func TestEncodePubkeyForEvent(t *testing.T) {
 	t.Logf("Encoded: %s", encoded)
 	require.True(t, utf8.ValidString(encoded))
 
-	decoded, err := DecodePubkeyFromEvent(encoded)
+	decoded, err := shielderevents.DecodePubkeyFromEvent(encoded)
 	require.Nil(t, err, "could not decode pubkey")
 	t.Logf("Decoded: %+v", decoded)
 	require.Equal(t, key.PublicKey, *decoded)
