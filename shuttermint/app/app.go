@@ -16,6 +16,7 @@ import (
 	"github.com/tendermint/go-amino"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 
+	"shielder/shuttermint/keyper/shielderevents"
 	"shielder/shuttermint/shmsg"
 )
 
@@ -320,7 +321,7 @@ func (app *ShielderApp) allowedToVoteOnConfigChanges(sender common.Address) bool
 }
 
 func (app *ShielderApp) deliverBatchConfig(msg *shmsg.BatchConfig, sender common.Address) abcitypes.ResponseDeliverTx {
-	bc, err := BatchConfigFromMessage(msg)
+	bc, err := shielderevents.BatchConfigFromMessage(msg)
 	if err != nil {
 		return makeErrorResponse(fmt.Sprintf("Malformed BatchConfig message: %s", err))
 	}
