@@ -23,33 +23,6 @@ import (
 	shcrypto "shielder/shuttermint/crypto"
 )
 
-// MakeBatchConfigEvent creates a 'shielder.batch-config' tendermint event. The given
-// startBatchIndex, threshold and list of keyper addresses are encoded as attributes of the event.
-func MakeBatchConfigEvent(startBatchIndex uint64, threshold uint64, keypers []common.Address, configIndex uint64) abcitypes.Event {
-	return abcitypes.Event{
-		Type: evtype.BatchConfig,
-		Attributes: []abcitypes.EventAttribute{
-			{
-				Key:   []byte("StartBatchIndex"),
-				Value: []byte(fmt.Sprintf("%d", startBatchIndex)),
-				Index: true,
-			},
-			{
-				Key:   []byte("Threshold"),
-				Value: []byte(fmt.Sprintf("%d", threshold)),
-			},
-			{
-				Key:   []byte("Keypers"),
-				Value: []byte(encodeAddressesForEvent(keypers)),
-			},
-			{
-				Key:   []byte("ConfigIndex"),
-				Value: []byte(fmt.Sprintf("%d", configIndex)),
-			},
-		},
-	}
-}
-
 // MakeDecryptionSignatureEvent creates a 'shielder.decryption-signature' event.
 func MakeDecryptionSignatureEvent(batchIndex uint64, sender common.Address, signature []byte) abcitypes.Event {
 	encodedSignature := base64.RawURLEncoding.EncodeToString(signature)
