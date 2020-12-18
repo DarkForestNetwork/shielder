@@ -624,7 +624,7 @@ func (app *ShielderApp) handleApologyMsg(msg *shmsg.Apology, sender common.Addre
 		return makeErrorResponse(msg)
 	}
 
-	event := MakeApologyRegisteredEvent(appMsg)
+	event := appMsg.MakeABCIEvent()
 	return abcitypes.ResponseDeliverTx{
 		Code:   0,
 		Events: []abcitypes.Event{event},

@@ -66,18 +66,13 @@ func TestApology(t *testing.T) {
 		eval := big.NewInt(int64(100 + i))
 		polyEval = append(polyEval, eval)
 	}
-	appEv := app.MakeApologyRegisteredEvent(&app.Apology{
+	ev := shielderevents.Apology{
 		Eon:      eon,
 		Sender:   sender,
-		Accusers: addresses,
+		Accusers: accusers,
 		PolyEval: polyEval,
-	})
-	mkeq(t, appEv, shielderevents.Apology{
-		Eon:      eon,
-		Sender:   sender,
-		Accusers: addresses,
-		PolyEval: polyEval,
-	})
+	}
+	roundtrip(t, ev)
 }
 
 func TestMakeEventBatchConfig(t *testing.T) {
