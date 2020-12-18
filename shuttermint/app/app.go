@@ -566,7 +566,7 @@ func (app *ShielderApp) handlePolyCommitmentMsg(msg *shmsg.PolyCommitment, sende
 		return makeErrorResponse(msg)
 	}
 
-	event := MakePolyCommitmentRegisteredEvent(appMsg)
+	event := appMsg.MakeABCIEvent()
 	return abcitypes.ResponseDeliverTx{
 		Code:   0,
 		Events: []abcitypes.Event{event},
