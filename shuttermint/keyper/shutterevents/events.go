@@ -18,8 +18,8 @@ import (
 	"github.com/ethereum/go-ethereum/crypto/ecies"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 
-	"shielder/shuttermint/app/evtype"
 	"shielder/shuttermint/crypto"
+	"shielder/shuttermint/keyper/shielderevents/evtype"
 )
 
 // Accusation represents a broadcasted accusation message against one or more keypers.
