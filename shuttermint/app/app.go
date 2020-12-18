@@ -508,7 +508,11 @@ func (app *ShielderApp) deliverDecryptionSignature(msg *shmsg.DecryptionSignatur
 	}
 	app.BatchStates[msg.BatchIndex] = bs
 
-	event := MakeDecryptionSignatureEvent(msg.BatchIndex, sender, msg.Signature)
+	event := shielderevents.DecryptionSignature{
+		BatchIndex: msg.BatchIndex,
+		Sender:     sender,
+		Signature:  msg.Signature,
+	}.MakeABCIEvent()
 	return abcitypes.ResponseDeliverTx{
 		Code:   0,
 		Events: []abcitypes.Event{event},
