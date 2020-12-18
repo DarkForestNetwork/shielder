@@ -410,7 +410,10 @@ func (app *ShielderApp) deliverCheckIn(msg *shmsg.CheckIn, sender common.Address
 	return abcitypes.ResponseDeliverTx{
 		Code: 0,
 		Events: []abcitypes.Event{
-			MakeCheckInEvent(sender, encryptionPublicKey),
+			shielderevents.CheckIn{
+				Sender:              sender,
+				EncryptionPublicKey: encryptionPublicKey,
+			}.MakeABCIEvent(),
 		},
 	}
 }

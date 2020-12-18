@@ -17,24 +17,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/ecies"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 
 	"shielder/shuttermint/app/evtype"
 	shcrypto "shielder/shuttermint/crypto"
 )
-
-// MakeCheckInEvent creates a shielder.check-in event, to be raised whenever a new keyper sends
-// their check in message.
-func MakeCheckInEvent(sender common.Address, encryptionPublicKey *ecies.PublicKey) abcitypes.Event {
-	return abcitypes.Event{
-		Type: evtype.CheckIn,
-		Attributes: []abcitypes.EventAttribute{
-			newAddressPair("Sender", sender),
-			newStringPair("EncryptionPublicKey", encodePubkeyForEvent(encryptionPublicKey.ExportECDSA())),
-		},
-	}
-}
 
 // MakeBatchConfigEvent creates a 'shielder.batch-config' tendermint event. The given
 // startBatchIndex, threshold and list of keyper addresses are encoded as attributes of the event.
