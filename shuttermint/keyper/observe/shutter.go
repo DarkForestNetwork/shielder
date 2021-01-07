@@ -45,6 +45,7 @@ type Eon struct {
 	Commitments []shielderevents.PolyCommitment
 	PolyEvals   []shielderevents.PolyEval
 	Accusations []shielderevents.Accusation
+	Apologies   []shielderevents.Apology
 }
 
 type Batch struct {
@@ -125,6 +126,13 @@ func (shielder *Shielder) applyEvent(height int64, ev shielderevents.IEvent) {
 			panic(err) // XXX we should remove that later
 		}
 		eon.Accusations = append(eon.Accusations, e)
+	case shielderevents.Apology:
+		eon, err := shielder.FindEon(e.Eon)
+		if err != nil {
+			panic(err) // XXX we should remove that later
+		}
+		eon.Apologies = append(eon.Apologies, e)
+
 	default:
 		warn()
 		panic("applyEvent: unknown event. giving up")
