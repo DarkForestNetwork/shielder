@@ -169,7 +169,7 @@ func (kpr *Keyper) fetchCurrentDKG(ctx context.Context) error {
 		fmt.Printf("=== tx height=%d\n", tx.Height)
 		events := tx.TxResult.GetEvents()
 		for _, rawEvent := range events {
-			e, err := shielderevents.MakeEvent(rawEvent)
+			e, err := shielderevents.MakeEvent(rawEvent, tx.Height)
 			if err != nil {
 				return err
 			}
@@ -551,7 +551,7 @@ func (kpr *Keyper) dispatchTxs() error {
 		case tx := <-kpr.txs:
 			d := tx.Data.(tmtypes.EventDataTx)
 			for _, ev := range d.TxResult.Result.Events {
-				x, err := shielderevents.MakeEvent(ev)
+				x, err := shielderevents.MakeEvent(ev, d.Height)
 				// XXX In case MakeEvent fails, returning with an error here, will
 				// abort the whole program. At the moment a malicious keyper is
 				// able to send a PolyCommitmentRegistered message with a malformed

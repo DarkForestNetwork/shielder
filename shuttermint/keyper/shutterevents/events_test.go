@@ -40,7 +40,7 @@ func init() {
 // roundtrip checks that the given IEvent round-trips, i.e. it can be serialized as an ABCI Event
 // and deserialized back again to an equal value.
 func roundtrip(t *testing.T, ev shielderevents.IEvent) {
-	ev2, err := shielderevents.MakeEvent(ev.MakeABCIEvent())
+	ev2, err := shielderevents.MakeEvent(ev.MakeABCIEvent(), 0)
 	require.Nil(t, err)
 	require.Equal(t, ev, ev2)
 }
