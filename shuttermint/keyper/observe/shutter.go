@@ -25,7 +25,7 @@ type Shielder struct {
 	CurrentBlock         int64
 	KeyperEncryptionKeys map[common.Address]*ecies.PublicKey
 	BatchConfigs         []shielderevents.BatchConfig
-	Batches              map[uint64]*Batch
+	Batches              map[uint64]*BatchData
 	Eons                 []Eon
 }
 
@@ -34,7 +34,7 @@ func NewShielder() *Shielder {
 	return &Shielder{
 		CurrentBlock:         -1,
 		KeyperEncryptionKeys: make(map[common.Address]*ecies.PublicKey),
-		Batches:              make(map[uint64]*Batch),
+		Batches:              make(map[uint64]*BatchData),
 	}
 }
 
@@ -48,7 +48,7 @@ type Eon struct {
 	Apologies   []shielderevents.Apology
 }
 
-type Batch struct {
+type BatchData struct {
 	BatchIndex           uint64
 	DecryptionSignatures []shielderevents.DecryptionSignature
 }
@@ -64,10 +64,10 @@ func (shielder *Shielder) applyTxEvents(height int64, events []abcitypes.Event) 
 	}
 }
 
-func (shielder *Shielder) getBatch(batchIndex uint64) *Batch {
+func (shielder *Shielder) getBatchData(batchIndex uint64) *BatchData {
 	b, ok := shielder.Batches[batchIndex]
 	if !ok {
-		b = &Batch{BatchIndex: batchIndex}
+		b = &BatchData{BatchIndex: batchIndex}
 		shielder.Batches[batchIndex] = b
 	}
 	return b
@@ -100,7 +100,7 @@ func (shielder *Shielder) applyEvent(height int64, ev shielderevents.IEvent) {
 	case shielderevents.BatchConfig:
 		shielder.BatchConfigs = append(shielder.BatchConfigs, e)
 	case shielderevents.DecryptionSignature:
-		b := shielder.getBatch(e.BatchIndex)
+		b := shielder.getBatchData(e.BatchIndex)
 		b.DecryptionSignatures = append(b.DecryptionSignatures, e)
 	case shielderevents.EonStarted:
 		idx := shielder.searchEon(e.Eon)
