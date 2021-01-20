@@ -10,4 +10,5 @@ var (
 	EonStarted          = "shielder.eon-started"
 	PolyCommitment      = "shielder.poly-commitment-registered"
 	PolyEval            = "shielder.poly-eval-registered"
+	EpochSecretKeyShare = "shielder.epoch-secret-key-share"
 )

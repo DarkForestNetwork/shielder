@@ -39,13 +39,14 @@ func NewShielder() *Shielder {
 }
 
 type Eon struct {
-	Eon         uint64
-	StartHeight int64
-	StartEvent  shielderevents.EonStarted
-	Commitments []shielderevents.PolyCommitment
-	PolyEvals   []shielderevents.PolyEval
-	Accusations []shielderevents.Accusation
-	Apologies   []shielderevents.Apology
+	Eon                  uint64
+	StartHeight          int64
+	StartEvent           shielderevents.EonStarted
+	Commitments          []shielderevents.PolyCommitment
+	PolyEvals            []shielderevents.PolyEval
+	Accusations          []shielderevents.Accusation
+	Apologies            []shielderevents.Apology
+	EpochSecretKeyShares []shielderevents.EpochSecretKeyShare
 }
 
 type BatchData struct {
@@ -80,6 +81,15 @@ func (shielder *Shielder) searchEon(eon uint64) int {
 			return eon <= shielder.Eons[i].Eon
 		},
 	)
+}
+
+func (shielder *Shielder) FindEonByBatchIndex(batchIndex uint64) (*Eon, error) {
+	for i := len(shielder.Eons) - 1; i >= 0; i-- {
+		if shielder.Eons[i].StartEvent.BatchIndex <= batchIndex {
+			return &shielder.Eons[i], nil
+		}
+	}
+	return nil, errEonNotFound
 }
 
 func (shielder *Shielder) FindEon(eon uint64) (*Eon, error) {
@@ -132,7 +142,12 @@ func (shielder *Shielder) applyEvent(height int64, ev shielderevents.IEvent) {
 			panic(err) // XXX we should remove that later
 		}
 		eon.Apologies = append(eon.Apologies, e)
-
+	case shielderevents.EpochSecretKeyShare:
+		eon, err := shielder.FindEon(e.Eon)
+		if err != nil {
+			panic(err) // XXX we should remove that later
+		}
+		eon.EpochSecretKeyShares = append(eon.EpochSecretKeyShares, e)
 	default:
 		warn()
 		panic("applyEvent: unknown event. giving up")
@@ -178,6 +193,15 @@ func (shielder *Shielder) IsKeyper(addr common.Address) bool {
 		}
 	}
 	return false
+}
+
+func (shielder *Shielder) FindBatchConfigByConfigIndex(configIndex uint64) (shielderevents.BatchConfig, error) {
+	for _, bc := range shielder.BatchConfigs {
+		if bc.ConfigIndex == configIndex {
+			return bc, nil
+		}
+	}
+	return shielderevents.BatchConfig{}, fmt.Errorf("cannot find BatchConfig with ConfigIndex==%d", configIndex)
 }
 
 func (shielder *Shielder) FindBatchConfigByBatchIndex(batchIndex uint64) shielderevents.BatchConfig {

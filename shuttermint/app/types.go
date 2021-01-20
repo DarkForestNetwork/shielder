@@ -141,17 +141,10 @@ type DKGInstance struct {
 }
 
 type (
-	Accusation     = shielderevents.Accusation
-	Apology        = shielderevents.Apology
-	BatchConfig    = shielderevents.BatchConfig
-	PolyCommitment = shielderevents.PolyCommitment
-	PolyEval       = shielderevents.PolyEval
+	Accusation          = shielderevents.Accusation
+	Apology             = shielderevents.Apology
+	BatchConfig         = shielderevents.BatchConfig
+	PolyCommitment      = shielderevents.PolyCommitment
+	PolyEval            = shielderevents.PolyEval
+	EpochSecretKeyShare = shielderevents.EpochSecretKeyShare
 )
-
-// EpochSecretKeyShareMsg represents a message containing an epoch secret key.
-type EpochSecretKeyShareMsg struct {
-	Sender              common.Address
-	Eon                 uint64
-	Epoch               uint64
-	EpochSecretKeyShare []byte
-}
