@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"shielder/shuttermint/contract"
-	shcrypto "shielder/shuttermint/crypto"
 	"shielder/shuttermint/keyper/shielderevents"
+	"shielder/shuttermint/shcrypto"
 )
 
 type testInstance struct {

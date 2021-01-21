@@ -9,13 +9,13 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 
-	"shielder/shuttermint/crypto"
+	"shielder/shuttermint/shcrypto"
 )
 
 func TestNewPolyCommitmentMsg(t *testing.T) {
 	eon := uint64(10)
 	threshold := uint64(5)
-	poly, err := crypto.RandomPolynomial(rand.Reader, threshold)
+	poly, err := shcrypto.RandomPolynomial(rand.Reader, threshold)
 	require.Nil(t, err)
 	gammas := poly.Gammas()
 
