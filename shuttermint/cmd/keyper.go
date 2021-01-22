@@ -34,20 +34,20 @@ type RawKeyperConfig struct {
 	DBDir                string
 }
 
-// keyperCmd represents the keyper2 command
-var keyper2Cmd = &cobra.Command{
-	Use:   "keyper2",
-	Short: "Run a shielder keyper2",
+// keyperCmd represents the keyper command
+var keyperCmd = &cobra.Command{
+	Use:   "keyper",
+	Short: "Run a shielder keyper",
 	Run: func(cmd *cobra.Command, args []string) {
-		keyper2Main()
+		keyperMain()
 	},
 }
 var interactive = false
 
 func init() {
-	rootCmd.AddCommand(keyper2Cmd)
-	keyper2Cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
-	keyper2Cmd.PersistentFlags().BoolVarP(&interactive, "interactive", "i", false, "interactive mode for debugging")
+	rootCmd.AddCommand(keyperCmd)
+	keyperCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
+	keyperCmd.PersistentFlags().BoolVarP(&interactive, "interactive", "i", false, "interactive mode for debugging")
 }
 
 func readKeyperConfig() (RawKeyperConfig, error) {
@@ -195,7 +195,7 @@ func ValidateKeyperConfig(r RawKeyperConfig) (keyper.KeyperConfig, error) {
 	}, nil
 }
 
-func keyper2Main() {
+func keyperMain() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
 	rkc, err := readKeyperConfig()
 	if err != nil {
@@ -214,7 +214,7 @@ func keyper2Main() {
 		kc.ShielderURL,
 		kc.EthereumURL,
 	)
-	kpr := keyper.NewKeyper2(kc)
+	kpr := keyper.NewKeyper(kc)
 	err = kpr.LoadState()
 	if err != nil {
 		panic(err)
