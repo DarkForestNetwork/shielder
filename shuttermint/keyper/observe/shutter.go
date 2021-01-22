@@ -221,7 +221,9 @@ func (shielder *Shielder) SyncToHead(ctx context.Context, shmcl client.Client) e
 	if err != nil {
 		return err
 	}
-
+	if latestBlock.Block == nil {
+		return fmt.Errorf("sync to head: empty blockchain: %+v", latestBlock)
+	}
 	err = shielder.fetchAndApplyEvents(ctx, shmcl, latestBlock.Block.Header.Height)
 	if err != nil {
 		return err
