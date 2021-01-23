@@ -60,7 +60,7 @@ func (shielder *Shielder) applyTxEvents(height int64, events []abcitypes.Event) 
 		if err != nil {
 			log.Printf("Error: malformed event: %s ev=%+v", err, ev)
 		} else {
-			shielder.applyEvent(height, x)
+			shielder.applyEvent(x)
 		}
 	}
 }
@@ -100,57 +100,102 @@ func (shielder *Shielder) FindEon(eon uint64) (*Eon, error) {
 	return &shielder.Eons[idx], nil
 }
 
-func (shielder *Shielder) applyEvent(height int64, ev shielderevents.IEvent) {
-	warn := func() {
-		fmt.Printf("XXX observing event not yet implemented: %s%+v\n", reflect.TypeOf(ev), ev)
+func (shielder *Shielder) applyCheckIn(e shielderevents.CheckIn) error {
+	shielder.KeyperEncryptionKeys[e.Sender] = e.EncryptionPublicKey
+	return nil
+}
+
+func (shielder *Shielder) applyBatchConfig(e shielderevents.BatchConfig) error {
+	shielder.BatchConfigs = append(shielder.BatchConfigs, e)
+	return nil
+}
+
+func (shielder *Shielder) applyDecryptionSignature(e shielderevents.DecryptionSignature) error {
+	b := shielder.getBatchData(e.BatchIndex)
+	b.DecryptionSignatures = append(b.DecryptionSignatures, e)
+	return nil
+}
+
+func (shielder *Shielder) applyEonStarted(e shielderevents.EonStarted) error {
+	idx := shielder.searchEon(e.Eon)
+	if idx < len(shielder.Eons) {
+		return fmt.Errorf("eons should increase")
 	}
+	shielder.Eons = append(shielder.Eons, Eon{Eon: e.Eon, StartEvent: e, StartHeight: e.Height})
+	return nil
+}
+
+func (shielder *Shielder) applyPolyCommitment(e shielderevents.PolyCommitment) error {
+	eon, err := shielder.FindEon(e.Eon)
+	if err != nil {
+		return err
+	}
+	eon.Commitments = append(eon.Commitments, e)
+	return nil
+}
+
+func (shielder *Shielder) applyPolyEval(e shielderevents.PolyEval) error {
+	eon, err := shielder.FindEon(e.Eon)
+	if err != nil {
+		return err
+	}
+	eon.PolyEvals = append(eon.PolyEvals, e)
+	return nil
+}
+
+func (shielder *Shielder) applyAccusation(e shielderevents.Accusation) error {
+	eon, err := shielder.FindEon(e.Eon)
+	if err != nil {
+		return err
+	}
+	eon.Accusations = append(eon.Accusations, e)
+	return nil
+}
+
+func (shielder *Shielder) applyApology(e shielderevents.Apology) error {
+	eon, err := shielder.FindEon(e.Eon)
+	if err != nil {
+		return err
+	}
+	eon.Apologies = append(eon.Apologies, e)
+	return nil
+}
+
+func (shielder *Shielder) applyEpochSecretKeyShare(e shielderevents.EpochSecretKeyShare) error {
+	eon, err := shielder.FindEon(e.Eon)
+	if err != nil {
+		return err
+	}
+	eon.EpochSecretKeyShares = append(eon.EpochSecretKeyShares, e)
+	return nil
+}
+
+func (shielder *Shielder) applyEvent(ev shielderevents.IEvent) {
+	var err error
 	switch e := ev.(type) {
 	case shielderevents.CheckIn:
-		shielder.KeyperEncryptionKeys[e.Sender] = e.EncryptionPublicKey
+		err = shielder.applyCheckIn(e)
 	case shielderevents.BatchConfig:
-		shielder.BatchConfigs = append(shielder.BatchConfigs, e)
+		err = shielder.applyBatchConfig(e)
 	case shielderevents.DecryptionSignature:
-		b := shielder.getBatchData(e.BatchIndex)
-		b.DecryptionSignatures = append(b.DecryptionSignatures, e)
+		err = shielder.applyDecryptionSignature(e)
 	case shielderevents.EonStarted:
-		idx := shielder.searchEon(e.Eon)
-		if idx < len(shielder.Eons) {
-			panic("eons should increase")
-		}
-		shielder.Eons = append(shielder.Eons, Eon{Eon: e.Eon, StartEvent: e, StartHeight: height})
+		err = shielder.applyEonStarted(e)
 	case shielderevents.PolyCommitment:
-		eon, err := shielder.FindEon(e.Eon)
-		if err != nil {
-			panic(err) // XXX we should remove that later
-		}
-		eon.Commitments = append(eon.Commitments, e)
+		err = shielder.applyPolyCommitment(e)
 	case shielderevents.PolyEval:
-		eon, err := shielder.FindEon(e.Eon)
-		if err != nil {
-			panic(err) // XXX we should remove that later
-		}
-		eon.PolyEvals = append(eon.PolyEvals, e)
+		err = shielder.applyPolyEval(e)
 	case shielderevents.Accusation:
-		eon, err := shielder.FindEon(e.Eon)
-		if err != nil {
-			panic(err) // XXX we should remove that later
-		}
-		eon.Accusations = append(eon.Accusations, e)
+		err = shielder.applyAccusation(e)
 	case shielderevents.Apology:
-		eon, err := shielder.FindEon(e.Eon)
-		if err != nil {
-			panic(err) // XXX we should remove that later
-		}
-		eon.Apologies = append(eon.Apologies, e)
+		err = shielder.applyApology(e)
 	case shielderevents.EpochSecretKeyShare:
-		eon, err := shielder.FindEon(e.Eon)
-		if err != nil {
-			panic(err) // XXX we should remove that later
-		}
-		eon.EpochSecretKeyShares = append(eon.EpochSecretKeyShares, e)
+		err = shielder.applyEpochSecretKeyShare(e)
 	default:
-		warn()
-		panic("applyEvent: unknown event. giving up")
+		err = fmt.Errorf("apply event not yet implemented for %s: %+v", reflect.TypeOf(ev), ev)
+	}
+	if err != nil {
+		log.Printf("Error in apply event: %s", err)
 	}
 }
 
