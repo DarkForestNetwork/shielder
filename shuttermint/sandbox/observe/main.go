@@ -19,7 +19,7 @@ func main() {
 
 	s := observe.NewShielder()
 
-	err = s.SyncToHead(context.Background(), cl)
+	s, err = s.SyncToHead(context.Background(), cl)
 	if err != nil {
 		panic(err)
 	}

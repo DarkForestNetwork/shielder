@@ -14,6 +14,7 @@ import (
 	"github.com/tendermint/tendermint/rpc/client"
 
 	"shielder/shuttermint/keyper/shielderevents"
+	"shielder/shuttermint/medley"
 )
 
 var errEonNotFound = errors.New("eon not found")
@@ -258,21 +259,28 @@ func (shielder *Shielder) FindBatchConfigByBatchIndex(batchIndex uint64) shielde
 	return shielderevents.BatchConfig{}
 }
 
+func (shielder *Shielder) Clone() *Shielder {
+	clone := new(Shielder)
+	medley.CloneWithGob(shielder, clone)
+	return clone
+}
+
 // SyncToHead syncs the state with the remote state. It fetches events from new blocks since the
-// last sync and updates the state by calling applyEvent for each event.
-// XXX this mutates the object in place. we may want to control mutation of the Shielder struct.
-func (shielder *Shielder) SyncToHead(ctx context.Context, shmcl client.Client) error {
+// last sync and updates the state by calling applyEvent for each event. This method does not
+// mutate the object in place, it rather returns a new object.
+func (shielder *Shielder) SyncToHead(ctx context.Context, shmcl client.Client) (*Shielder, error) {
 	latestBlock, err := shmcl.Block(ctx, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if latestBlock.Block == nil {
-		return fmt.Errorf("sync to head: empty blockchain: %+v", latestBlock)
+		return nil, fmt.Errorf("sync to head: empty blockchain: %+v", latestBlock)
 	}
-	err = shielder.fetchAndApplyEvents(ctx, shmcl, latestBlock.Block.Header.Height)
+	clone := shielder.Clone()
+	err = clone.fetchAndApplyEvents(ctx, shmcl, latestBlock.Block.Header.Height)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	shielder.CurrentBlock = latestBlock.Block.Header.Height
-	return nil
+	clone.CurrentBlock = latestBlock.Block.Header.Height
+	return clone, nil
 }
