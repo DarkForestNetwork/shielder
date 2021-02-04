@@ -2,13 +2,16 @@ package observe
 
 import (
 	"context"
+	"encoding/gob"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"reflect"
 	"sort"
 
 	"github.com/ethereum/go-ethereum/common"
+	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/crypto/ecies"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/rpc/client"
@@ -19,12 +22,37 @@ import (
 
 var errEonNotFound = errors.New("eon not found")
 
+func init() {
+	gob.Register(ethcrypto.S256()) // Allow gob to serialize ecsda.PrivateKey
+}
+
+// EncryptionPublicKey is a gob serializable version of ecies.PublicKey
+type EncryptionPublicKey ecies.PublicKey
+
+func (epk *EncryptionPublicKey) GobEncode() ([]byte, error) {
+	return ethcrypto.FromECDSAPub((*ecies.PublicKey)(epk).ExportECDSA()), nil
+}
+
+func (epk *EncryptionPublicKey) GobDecode(data []byte) error {
+	pubkey, err := ethcrypto.UnmarshalPubkey(data)
+	if err != nil {
+		return err
+	}
+	*epk = *(*EncryptionPublicKey)(ecies.ImportECDSAPublic(pubkey))
+	return nil
+}
+
+// Encrypt the given message m
+func (epk *EncryptionPublicKey) Encrypt(rand io.Reader, m []byte) ([]byte, error) {
+	return ecies.Encrypt(rand, (*ecies.PublicKey)(epk), m, nil, nil)
+}
+
 // Shielder let's a keyper fetch all necessary information from a shuttermint node. The only source
 // for the data stored in this struct should be the shielder node.  The SyncToHead method can be
 // used to update the data. All other accesses should be read-only.
 type Shielder struct {
 	CurrentBlock         int64
-	KeyperEncryptionKeys map[common.Address]*ecies.PublicKey
+	KeyperEncryptionKeys map[common.Address]*EncryptionPublicKey
 	BatchConfigs         []shielderevents.BatchConfig
 	Batches              map[uint64]*BatchData
 	Eons                 []Eon
@@ -34,7 +62,7 @@ type Shielder struct {
 func NewShielder() *Shielder {
 	return &Shielder{
 		CurrentBlock:         -1,
-		KeyperEncryptionKeys: make(map[common.Address]*ecies.PublicKey),
+		KeyperEncryptionKeys: make(map[common.Address]*EncryptionPublicKey),
 		Batches:              make(map[uint64]*BatchData),
 	}
 }
@@ -102,7 +130,7 @@ func (shielder *Shielder) FindEon(eon uint64) (*Eon, error) {
 }
 
 func (shielder *Shielder) applyCheckIn(e shielderevents.CheckIn) error {
-	shielder.KeyperEncryptionKeys[e.Sender] = e.EncryptionPublicKey
+	shielder.KeyperEncryptionKeys[e.Sender] = (*EncryptionPublicKey)(e.EncryptionPublicKey)
 	return nil
 }
 
