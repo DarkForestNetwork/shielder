@@ -254,10 +254,11 @@ func (kpr *Keyper) ShortInfo() string {
 		dkgInfo = append(dkgInfo, dkg.ShortInfo())
 	}
 	return fmt.Sprintf(
-		"shielder block %d, main chain %d, last eon started %d, DKGs: %s",
+		"shielder block %d, main chain %d, last eon started %d, num half steps: %d, DKGs: %s",
 		kpr.Shielder.CurrentBlock,
 		kpr.MainChain.CurrentBlock,
 		kpr.State.LastEonStarted,
+		kpr.MainChain.NumExecutionHalfSteps,
 		strings.Join(dkgInfo, " - "),
 	)
 }
