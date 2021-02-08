@@ -51,16 +51,13 @@ func showShielder(shuttermintURL string, height int64) {
 	}
 
 	s := observe.NewShielder()
-	latestBlock, err := cl.Block(context.Background(), nil)
-	if err != nil {
-		panic(err)
-	}
-	if latestBlock.Block == nil {
-		panic("empty shielder blockchain")
-	}
 	if height == -1 {
-		height = latestBlock.Block.Height
+		height, err = s.LastCommittedHeight(context.Background(), cl)
+		if err != nil {
+			panic(err)
+		}
 	}
+
 	s, err = s.SyncToHeight(context.Background(), cl, height)
 	if err != nil {
 		panic(err)
