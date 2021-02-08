@@ -304,11 +304,16 @@ func (shielder *Shielder) SyncToHead(ctx context.Context, shmcl client.Client) (
 	if latestBlock.Block == nil {
 		return nil, fmt.Errorf("sync to head: empty blockchain: %+v", latestBlock)
 	}
+	return shielder.SyncToHeight(ctx, shmcl, latestBlock.Block.Header.Height)
+}
+
+// SyncToHeight syncs the state with the remote state until the given height
+func (shielder *Shielder) SyncToHeight(ctx context.Context, shmcl client.Client, height int64) (*Shielder, error) {
 	clone := shielder.Clone()
-	err = clone.fetchAndApplyEvents(ctx, shmcl, latestBlock.Block.Header.Height)
+	err := clone.fetchAndApplyEvents(ctx, shmcl, height)
 	if err != nil {
 		return nil, err
 	}
-	clone.CurrentBlock = latestBlock.Block.Header.Height
+	clone.CurrentBlock = height
 	return clone, nil
 }
