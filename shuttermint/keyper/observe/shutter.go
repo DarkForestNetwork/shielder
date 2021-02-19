@@ -129,17 +129,17 @@ func (shielder *Shielder) FindEon(eon uint64) (*Eon, error) {
 	return &shielder.Eons[idx], nil
 }
 
-func (shielder *Shielder) applyCheckIn(e shielderevents.CheckIn) error {
+func (shielder *Shielder) applyCheckIn(e shielderevents.CheckIn) error { //nolint:unparam
 	shielder.KeyperEncryptionKeys[e.Sender] = (*EncryptionPublicKey)(e.EncryptionPublicKey)
 	return nil
 }
 
-func (shielder *Shielder) applyBatchConfig(e shielderevents.BatchConfig) error {
+func (shielder *Shielder) applyBatchConfig(e shielderevents.BatchConfig) error { //nolint:unparam
 	shielder.BatchConfigs = append(shielder.BatchConfigs, e)
 	return nil
 }
 
-func (shielder *Shielder) applyDecryptionSignature(e shielderevents.DecryptionSignature) error {
+func (shielder *Shielder) applyDecryptionSignature(e shielderevents.DecryptionSignature) error { //nolint:unparam
 	b := shielder.getBatchData(e.BatchIndex)
 	b.DecryptionSignatures = append(b.DecryptionSignatures, e)
 	return nil
