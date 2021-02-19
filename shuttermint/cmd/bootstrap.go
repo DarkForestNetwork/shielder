@@ -55,8 +55,6 @@ func getConfigContractAddress() common.Address {
 }
 
 func init() {
-	rootCmd.AddCommand(bootstrapCmd)
-
 	bootstrapCmd.PersistentFlags().StringVarP(
 		&bootstrapFlags.ShielderURL,
 		"shuttermint-url",
