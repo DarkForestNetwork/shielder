@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"shielder/shuttermint/cmd/shversion"
 	"shielder/shuttermint/keyper"
 )
 
@@ -209,7 +210,7 @@ func keyperMain() {
 
 	log.Printf(
 		"Starting keyper version %s with signing key %s, using %s for Shielder and %s for Ethereum",
-		version,
+		shversion.Version,
 		kc.Address().Hex(),
 		kc.ShielderURL,
 		kc.EthereumURL,

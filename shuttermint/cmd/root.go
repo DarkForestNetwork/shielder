@@ -5,18 +5,17 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"shielder/shuttermint/cmd/shversion"
 )
 
-var (
-	version string = "(unknown)"
-	cfgFile string
-)
+var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "shuttermint",
 	Short:   "shuttermint runs the shielder tendermint app or a shielder keyper",
-	Version: version,
+	Version: shversion.Version,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
