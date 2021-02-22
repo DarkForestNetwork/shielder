@@ -16,7 +16,7 @@ const keyFlagName = "owner-key"
 
 var ConfigCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Configure and query the Shielder config contract",
+	Short: "Send batch configs to and query them from Shielder's config contract",
 }
 
 var (

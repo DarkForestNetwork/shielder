@@ -19,7 +19,7 @@ var showFlags struct {
 // keyperCmd represents the keyper command
 var showCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Show shielder internal state",
+	Short: "Show the internal state of a Shielder node",
 	Run: func(cmd *cobra.Command, args []string) {
 		showMain()
 	},
