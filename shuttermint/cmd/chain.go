@@ -22,23 +22,22 @@ import (
 	"shielder/shuttermint/cmd/shversion"
 )
 
-// runCmd represents the run command
-var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Run the shielder tendermint app",
-	Long:  `The run commands run the shielder tendermint app`,
+var chainCmd = &cobra.Command{
+	Use:   "chain",
+	Short: "Run a node for Shielder's Tendermint chain",
+	Long:  `This command runs a node that will connect to Shielder's Tendermint chain.`,
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		runMain()
+		chainMain()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(runCmd)
-	runCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (required)")
-	runCmd.MarkPersistentFlagRequired("config")
+	chainCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (required)")
+	chainCmd.MarkPersistentFlagRequired("config")
 }
 
-func runMain() {
+func chainMain() {
 	stdlog.SetFlags(stdlog.LstdFlags | stdlog.Lshortfile | stdlog.Lmicroseconds)
 	stdlog.Printf("Starting shuttermint version %s", shversion.Version)
 

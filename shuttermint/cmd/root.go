@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"shielder/shuttermint/cmd/config"
 	"shielder/shuttermint/cmd/shversion"
 )
 
@@ -14,7 +15,7 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "shuttermint",
-	Short:   "shuttermint runs the shielder tendermint app or a shielder keyper",
+	Short:   "A collection of commands to run and interact with Shielder keyper nodes",
 	Version: shversion.Version,
 }
 
@@ -25,4 +26,14 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func init() {
+	rootCmd.AddCommand(chainCmd)
+	rootCmd.AddCommand(config.ConfigCmd)
+	rootCmd.AddCommand(keyperCmd)
+	rootCmd.AddCommand(showCmd)
+	rootCmd.AddCommand(bootstrapCmd)
+	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(deployCmd)
 }
