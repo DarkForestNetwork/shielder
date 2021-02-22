@@ -209,7 +209,7 @@ func keyperMain() {
 
 	log.Printf(
 		"Starting keyper version %s with signing key %s, using %s for Shielder and %s for Ethereum",
-		shversion.Version,
+		shversion.Version(),
 		kc.Address().Hex(),
 		kc.ShielderURL,
 		kc.EthereumURL,
