@@ -253,7 +253,7 @@ func (shielder *Shielder) fetchAndApplyEvents(ctx context.Context, shmcl client.
 	return nil
 }
 
-// IsCheckedIn checks if the given address sent it's checkin message
+// IsCheckedIn checks if the given address sent it's check-in message
 func (shielder *Shielder) IsCheckedIn(addr common.Address) bool {
 	_, ok := shielder.KeyperEncryptionKeys[addr]
 	return ok
