@@ -202,24 +202,24 @@ func (shielder *Shielder) applyEpochSecretKeyShare(e shielderevents.EpochSecretK
 func (shielder *Shielder) applyEvent(ev shielderevents.IEvent) {
 	var err error
 	switch e := ev.(type) {
-	case shielderevents.CheckIn:
-		err = shielder.applyCheckIn(e)
-	case shielderevents.BatchConfig:
-		err = shielder.applyBatchConfig(e)
-	case shielderevents.DecryptionSignature:
-		err = shielder.applyDecryptionSignature(e)
-	case shielderevents.EonStarted:
-		err = shielder.applyEonStarted(e)
-	case shielderevents.PolyCommitment:
-		err = shielder.applyPolyCommitment(e)
-	case shielderevents.PolyEval:
-		err = shielder.applyPolyEval(e)
-	case shielderevents.Accusation:
-		err = shielder.applyAccusation(e)
-	case shielderevents.Apology:
-		err = shielder.applyApology(e)
-	case shielderevents.EpochSecretKeyShare:
-		err = shielder.applyEpochSecretKeyShare(e)
+	case *shielderevents.CheckIn:
+		err = shielder.applyCheckIn(*e)
+	case *shielderevents.BatchConfig:
+		err = shielder.applyBatchConfig(*e)
+	case *shielderevents.DecryptionSignature:
+		err = shielder.applyDecryptionSignature(*e)
+	case *shielderevents.EonStarted:
+		err = shielder.applyEonStarted(*e)
+	case *shielderevents.PolyCommitment:
+		err = shielder.applyPolyCommitment(*e)
+	case *shielderevents.PolyEval:
+		err = shielder.applyPolyEval(*e)
+	case *shielderevents.Accusation:
+		err = shielder.applyAccusation(*e)
+	case *shielderevents.Apology:
+		err = shielder.applyApology(*e)
+	case *shielderevents.EpochSecretKeyShare:
+		err = shielder.applyEpochSecretKeyShare(*e)
 	default:
 		err = fmt.Errorf("not yet implemented for %s", reflect.TypeOf(ev))
 	}
