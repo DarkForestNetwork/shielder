@@ -377,12 +377,7 @@ func (kpr *Keyper) saveState() error {
 }
 
 func (kpr *Keyper) runOneStep(ctx context.Context) {
-	decider := Decider{
-		Config:    kpr.Config,
-		State:     kpr.State,
-		Shielder:   kpr.Shielder,
-		MainChain: kpr.MainChain,
-	}
+	decider := NewDecider(kpr)
 	decider.Decide()
 
 	now := time.Now()
