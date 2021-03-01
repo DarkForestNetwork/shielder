@@ -245,7 +245,7 @@ func (shielder *Shielder) fetchAndApplyEvents(ctx context.Context, shmcl client.
 			events := tx.TxResult.GetEvents()
 			shielder.applyTxEvents(tx.Height, events)
 		}
-		if page*perPage > res.TotalCount {
+		if page*perPage >= res.TotalCount {
 			break
 		}
 		page++
