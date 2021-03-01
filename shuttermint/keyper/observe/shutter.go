@@ -232,10 +232,13 @@ func (shielder *Shielder) fetchAndApplyEvents(ctx context.Context, shmcl client.
 	if targetHeight < shielder.CurrentBlock {
 		panic("internal error: fetchAndApplyEvents bad arguments")
 	}
-	query := fmt.Sprintf("tx.height >= %d and tx.height<=%d", shielder.CurrentBlock+1, targetHeight)
+	query := fmt.Sprintf("tx.height >= %d and tx.height <= %d", shielder.CurrentBlock+1, targetHeight)
 
+	// tendermint silently caps the perPage value at 100, make sure to stay below, otherwise
+	// our exit condition is wrong and the log.Fatalf will trigger a panic below; see
+	// https://shielder/issues/50
+	perPage := 100
 	page := 1
-	perPage := 200
 	total := 0
 	for {
 		res, err := shmcl.TxSearch(ctx, query, false, &page, &perPage, "")
