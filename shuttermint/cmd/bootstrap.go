@@ -13,7 +13,7 @@ import (
 	"github.com/tendermint/tendermint/rpc/client/http"
 
 	"shielder/shuttermint/contract"
-	"shielder/shuttermint/keyper"
+	"shielder/shuttermint/keyper/fx"
 	"shielder/shuttermint/sandbox"
 	"shielder/shuttermint/shmsg"
 )
@@ -141,7 +141,7 @@ func bootstrap() {
 	}
 	keypers := bc.Keypers
 
-	ms := keyper.NewRPCMessageSender(shmcl, signingKey)
+	ms := fx.NewRPCMessageSender(shmcl, signingKey)
 	batchConfigMsg := shmsg.NewBatchConfig(
 		bc.StartBatchIndex,
 		keypers,
