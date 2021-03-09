@@ -66,7 +66,7 @@ func NewKeyper(kc KeyperConfig) Keyper {
 		Config:    kc,
 		State:     NewState(),
 		Shielder:   observe.NewShielder(),
-		MainChain: observe.NewMainChain(),
+		MainChain: observe.NewMainChain(kc.MainChainFollowDistance),
 	}
 }
 
