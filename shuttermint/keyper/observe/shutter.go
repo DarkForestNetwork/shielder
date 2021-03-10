@@ -13,6 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/crypto/ecies"
+	pkgErrors "github.com/pkg/errors"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/rpc/client"
 
@@ -118,13 +119,13 @@ func (shielder *Shielder) FindEonByBatchIndex(batchIndex uint64) (*Eon, error) {
 			return &shielder.Eons[i], nil
 		}
 	}
-	return nil, errEonNotFound
+	return nil, pkgErrors.WithStack(errEonNotFound)
 }
 
 func (shielder *Shielder) FindEon(eon uint64) (*Eon, error) {
 	idx := shielder.searchEon(eon)
 	if idx == len(shielder.Eons) || eon < shielder.Eons[idx].Eon {
-		return nil, errEonNotFound
+		return nil, pkgErrors.WithStack(errEonNotFound)
 	}
 	return &shielder.Eons[idx], nil
 }
