@@ -84,7 +84,7 @@ func txsearchShielder(shuttermintURL string, fromHeight, toHeight int64) {
 			for _, ev := range events {
 				x, err := shielderevents.MakeEvent(ev, tx.Height)
 				if err != nil {
-					log.Printf("Error: malformed event: %s ev=%+v", err, ev)
+					log.Printf("Error: malformed event: %+v ev=%+v", err, ev)
 				} else {
 					fmt.Printf("    %#v\n", x)
 				}

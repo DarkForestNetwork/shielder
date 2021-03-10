@@ -509,7 +509,7 @@ func (app *ShielderApp) deliverDecryptionSignature(msg *shmsg.DecryptionSignatur
 	bs := app.getBatchState(msg.BatchIndex)
 	err := bs.AddDecryptionSignature(DecryptionSignature{Sender: sender, Signature: msg.Signature})
 	if err != nil {
-		msg := fmt.Sprintf("Error: cannot add decryption signature: %s", err)
+		msg := fmt.Sprintf("Error: cannot add decryption signature: %+v", err)
 		log.Print(msg)
 		return makeErrorResponse(msg)
 	}
@@ -529,7 +529,7 @@ func (app *ShielderApp) deliverDecryptionSignature(msg *shmsg.DecryptionSignatur
 func (app *ShielderApp) handlePolyEvalMsg(msg *shmsg.PolyEval, sender common.Address) abcitypes.ResponseDeliverTx {
 	appMsg, err := ParsePolyEvalMsg(msg, sender)
 	if err != nil {
-		msg := fmt.Sprintf("Error: Failed to parse PolyEval message: %s", err)
+		msg := fmt.Sprintf("Error: Failed to parse PolyEval message: %+v", err)
 		log.Print(msg)
 		return makeErrorResponse(msg)
 	}
@@ -543,7 +543,7 @@ func (app *ShielderApp) handlePolyEvalMsg(msg *shmsg.PolyEval, sender common.Add
 
 	err = dkg.RegisterPolyEvalMsg(*appMsg)
 	if err != nil {
-		msg := fmt.Sprintf("Error: Failed to register PolyEval message: %s", err)
+		msg := fmt.Sprintf("Error: Failed to register PolyEval message: %+v", err)
 		log.Print(msg)
 		return makeErrorResponse(msg)
 	}
@@ -558,7 +558,7 @@ func (app *ShielderApp) handlePolyEvalMsg(msg *shmsg.PolyEval, sender common.Add
 func (app *ShielderApp) handlePolyCommitmentMsg(msg *shmsg.PolyCommitment, sender common.Address) abcitypes.ResponseDeliverTx {
 	appMsg, err := ParsePolyCommitmentMsg(msg, sender)
 	if err != nil {
-		msg := fmt.Sprintf("Error: Failed to parse PolyCommitment message: %s", err)
+		msg := fmt.Sprintf("Error: Failed to parse PolyCommitment message: %+v", err)
 		log.Print(msg)
 		return makeErrorResponse(msg)
 	}
@@ -572,7 +572,7 @@ func (app *ShielderApp) handlePolyCommitmentMsg(msg *shmsg.PolyCommitment, sende
 
 	err = dkg.RegisterPolyCommitmentMsg(*appMsg)
 	if err != nil {
-		msg := fmt.Sprintf("Error: Failed to register PolyCommitment message: %s", err)
+		msg := fmt.Sprintf("Error: Failed to register PolyCommitment message: %+v", err)
 		log.Print(msg)
 		return makeErrorResponse(msg)
 	}
@@ -587,7 +587,7 @@ func (app *ShielderApp) handlePolyCommitmentMsg(msg *shmsg.PolyCommitment, sende
 func (app *ShielderApp) handleAccusationMsg(msg *shmsg.Accusation, sender common.Address) abcitypes.ResponseDeliverTx {
 	appMsg, err := ParseAccusationMsg(msg, sender)
 	if err != nil {
-		msg := fmt.Sprintf("Error: Failed to parse Accusation message: %s", err)
+		msg := fmt.Sprintf("Error: Failed to parse Accusation message: %+v", err)
 		log.Print(msg)
 		return makeErrorResponse(msg)
 	}
@@ -601,7 +601,7 @@ func (app *ShielderApp) handleAccusationMsg(msg *shmsg.Accusation, sender common
 
 	err = dkg.RegisterAccusationMsg(*appMsg)
 	if err != nil {
-		msg := fmt.Sprintf("Error: Failed to register Accusation message: %s", err)
+		msg := fmt.Sprintf("Error: Failed to register Accusation message: %+v", err)
 		log.Print(msg)
 		return makeErrorResponse(msg)
 	}
@@ -616,7 +616,7 @@ func (app *ShielderApp) handleAccusationMsg(msg *shmsg.Accusation, sender common
 func (app *ShielderApp) handleApologyMsg(msg *shmsg.Apology, sender common.Address) abcitypes.ResponseDeliverTx {
 	appMsg, err := ParseApologyMsg(msg, sender)
 	if err != nil {
-		msg := fmt.Sprintf("Error: Failed to parse Apology message: %s", err)
+		msg := fmt.Sprintf("Error: Failed to parse Apology message: %+v", err)
 		log.Print(msg)
 		return makeErrorResponse(msg)
 	}
@@ -630,7 +630,7 @@ func (app *ShielderApp) handleApologyMsg(msg *shmsg.Apology, sender common.Addre
 
 	err = dkg.RegisterApologyMsg(*appMsg)
 	if err != nil {
-		msg := fmt.Sprintf("Error: Failed to register Apology message: %s", err)
+		msg := fmt.Sprintf("Error: Failed to register Apology message: %+v", err)
 		log.Print(msg)
 		return makeErrorResponse(msg)
 	}
@@ -645,7 +645,7 @@ func (app *ShielderApp) handleApologyMsg(msg *shmsg.Apology, sender common.Addre
 func (app *ShielderApp) handleEpochSecretKeyShareMsg(msg *shmsg.EpochSecretKeyShare, sender common.Address) abcitypes.ResponseDeliverTx {
 	appMsg, err := ParseEpochSecretKeyShareMsg(msg, sender)
 	if err != nil {
-		msg := fmt.Sprintf("Error: Failed to parse EpochSecretKeyShare message: %s", err)
+		msg := fmt.Sprintf("Error: Failed to parse EpochSecretKeyShare message: %+v", err)
 		log.Print(msg)
 		return makeErrorResponse(msg)
 	}
@@ -804,7 +804,7 @@ func (app *ShielderApp) PersistToDisk() error {
 	defer func() {
 		err = file.Close()
 		if err != nil {
-			log.Printf("Error: close file: %s", err)
+			log.Printf("Error: close file: %+v", err)
 			return
 		}
 	}()
@@ -838,7 +838,7 @@ func (app *ShielderApp) Commit() abcitypes.ResponseCommit {
 
 	err := app.maybePersistToDisk()
 	if err != nil {
-		log.Printf("Error: cannot persist state to disk: %s", err)
+		log.Printf("Error: cannot persist state to disk: %+v", err)
 	}
 
 	return abcitypes.ResponseCommit{}
