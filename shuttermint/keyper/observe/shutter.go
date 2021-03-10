@@ -149,7 +149,7 @@ func (shielder *Shielder) applyDecryptionSignature(e shielderevents.DecryptionSi
 func (shielder *Shielder) applyEonStarted(e shielderevents.EonStarted) error {
 	idx := shielder.searchEon(e.Eon)
 	if idx < len(shielder.Eons) {
-		return fmt.Errorf("eons should increase")
+		return pkgErrors.Errorf("eons should increase")
 	}
 	shielder.Eons = append(shielder.Eons, Eon{Eon: e.Eon, StartEvent: e, StartHeight: e.Height})
 	return nil
@@ -222,7 +222,7 @@ func (shielder *Shielder) applyEvent(ev shielderevents.IEvent) {
 	case *shielderevents.EpochSecretKeyShare:
 		err = shielder.applyEpochSecretKeyShare(*e)
 	default:
-		err = fmt.Errorf("not yet implemented for %s", reflect.TypeOf(ev))
+		err = pkgErrors.Errorf("not yet implemented for %s", reflect.TypeOf(ev))
 	}
 	if err != nil {
 		log.Printf("Error in apply event: %s, event: %+v", err, ev)
@@ -288,7 +288,7 @@ func (shielder *Shielder) FindBatchConfigByConfigIndex(configIndex uint64) (shie
 			return bc, nil
 		}
 	}
-	return shielderevents.BatchConfig{}, fmt.Errorf("cannot find BatchConfig with ConfigIndex==%d", configIndex)
+	return shielderevents.BatchConfig{}, pkgErrors.Errorf("cannot find BatchConfig with ConfigIndex==%d", configIndex)
 }
 
 func (shielder *Shielder) FindBatchConfigByBatchIndex(batchIndex uint64) shielderevents.BatchConfig {
@@ -312,7 +312,7 @@ func (shielder *Shielder) LastCommittedHeight(ctx context.Context, shmcl client.
 		return 0, err
 	}
 	if latestBlock.Block == nil || latestBlock.Block.LastCommit == nil {
-		return 0, fmt.Errorf("empty blockchain: %+v", latestBlock)
+		return 0, pkgErrors.Errorf("empty blockchain: %+v", latestBlock)
 	}
 	return latestBlock.Block.LastCommit.Height, nil
 }
