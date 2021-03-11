@@ -53,7 +53,7 @@ func showShielder(shuttermintURL string, height int64) {
 
 	s := observe.NewShielder()
 	if height == -1 {
-		height, err = s.LastCommittedHeight(context.Background(), cl)
+		height, err = s.GetLastCommittedHeight(context.Background(), cl)
 		if err != nil {
 			panic(err)
 		}
