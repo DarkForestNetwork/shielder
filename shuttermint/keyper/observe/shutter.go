@@ -9,7 +9,6 @@ import (
 	"log"
 	"reflect"
 	"sort"
-	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
@@ -22,13 +21,6 @@ import (
 
 	"shielder/shuttermint/keyper/shielderevents"
 	"shielder/shuttermint/medley"
-)
-
-// We call the state unsynced if it hasn't been updated for more than this duration or if we know
-// there are more than this number of new blocks.
-const (
-	shuttermintSyncedGracePeriod = 30 * time.Second
-	shuttermintSyncedGraceBlocks = 2
 )
 
 var errEonNotFound = errors.New("eon not found")
@@ -67,7 +59,6 @@ type Shielder struct {
 	CurrentBlock         int64
 	LastCommittedHeight  int64
 	NodeStatus           *rpctypes.ResultStatus
-	TimeLastSynced       time.Time
 	KeyperEncryptionKeys map[common.Address]*EncryptionPublicKey
 	BatchConfigs         []shielderevents.BatchConfig
 	Batches              map[uint64]*BatchData
@@ -345,7 +336,6 @@ func (shielder *Shielder) SyncToHead(ctx context.Context, shmcl client.Client) (
 
 // SyncToHeight syncs the state with the remote state until the given height
 func (shielder *Shielder) SyncToHeight(ctx context.Context, shmcl client.Client, height int64) (*Shielder, error) {
-	now := time.Now()
 	clone := shielder.Clone()
 
 	nodeStatus, err := shmcl.Status(ctx)
@@ -365,28 +355,12 @@ func (shielder *Shielder) SyncToHeight(ctx context.Context, shmcl client.Client,
 
 	clone.CurrentBlock = height
 	clone.LastCommittedHeight = lastCommittedHeight
-	clone.TimeLastSynced = now
 	clone.NodeStatus = nodeStatus
 
 	return clone, nil
 }
 
-// IsSyncedToNode checks if the state is likely to be more or less in sync with the shuttermint
-// node we are connected to.
-func (shielder *Shielder) IsSyncedToNode() bool {
-	dt := time.Since(shielder.TimeLastSynced)
-	tooOld := dt.Seconds() >= shuttermintSyncedGracePeriod.Seconds()
-	knownNewBlocks := (shielder.LastCommittedHeight >= shuttermintSyncedGraceBlocks &&
-		shielder.CurrentBlock <= shielder.LastCommittedHeight-shuttermintSyncedGraceBlocks)
-	return !tooOld && !knownNewBlocks
-}
-
-// IsNodeSynced checks if the shuttermint node is synced with the network.
-func (shielder *Shielder) IsNodeSynced() bool {
-	return shielder.NodeStatus == nil || !shielder.NodeStatus.SyncInfo.CatchingUp
-}
-
-// IsSynced checks if the state is synced to the Tendermint chain.
+// IsSynced checks if the shuttermint node is synced with the network.
 func (shielder *Shielder) IsSynced() bool {
-	return shielder.IsSyncedToNode() && shielder.IsNodeSynced()
+	return shielder.NodeStatus == nil || !shielder.NodeStatus.SyncInfo.CatchingUp
 }
