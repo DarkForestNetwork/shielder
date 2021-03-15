@@ -235,7 +235,7 @@ func (shielder *Shielder) applyEvent(ev shielderevents.IEvent) {
 	}
 }
 
-func (shielder *Shielder) fetchAndApplyEvents(ctx context.Context, shmcl client.Client, targetHeight int64) error {
+func (shielder *Shielder) fetchAndApplyEvents(ctx context.Context, shmcl client.Client, targetHeight int64) (*Shielder, error) {
 	if targetHeight < shielder.CurrentBlock {
 		panic("internal error: fetchAndApplyEvents bad arguments")
 	}
@@ -247,11 +247,21 @@ func (shielder *Shielder) fetchAndApplyEvents(ctx context.Context, shmcl client.
 	perPage := 100
 	page := 1
 	total := 0
+	cloned := false
 	for {
 		res, err := shmcl.TxSearch(ctx, query, false, &page, &perPage, "")
 		if err != nil {
-			return pkgErrors.Wrap(err, "failed to fetch shuttermint txs")
+			return nil, pkgErrors.Wrap(err, "failed to fetch shuttermint txs")
 		}
+		// Create a shallow or deep clone
+		if !cloned {
+			if res.TotalCount == 0 {
+				return shielder.ShallowClone(), nil
+			}
+			shielder = shielder.Clone()
+			cloned = true
+		}
+
 		total += len(res.Txs)
 		for _, tx := range res.Txs {
 			events := tx.TxResult.GetEvents()
@@ -269,7 +279,7 @@ func (shielder *Shielder) fetchAndApplyEvents(ctx context.Context, shmcl client.
 		}
 		page++
 	}
-	return nil
+	return shielder, nil
 }
 
 // IsCheckedIn checks if the given address sent it's check-in message
@@ -306,6 +316,11 @@ func (shielder *Shielder) FindBatchConfigByBatchIndex(batchIndex uint64) shielde
 	return shielderevents.BatchConfig{}
 }
 
+func (shielder *Shielder) ShallowClone() *Shielder {
+	s := *shielder
+	return &s
+}
+
 func (shielder *Shielder) Clone() *Shielder {
 	clone := new(Shielder)
 	medley.CloneWithGob(shielder, clone)
@@ -340,19 +355,17 @@ func (shielder *Shielder) SyncToHead(ctx context.Context, shmcl client.Client) (
 
 // SyncToHeight syncs the state with the remote state until the given height
 func (shielder *Shielder) SyncToHeight(ctx context.Context, shmcl client.Client, height int64) (*Shielder, error) {
-	clone := shielder.Clone()
-
 	nodeStatus, err := shmcl.Status(ctx)
 	if err != nil {
 		return nil, pkgErrors.Wrap(err, "failed to get shuttermint status")
 	}
 
-	lastCommittedHeight, err := clone.GetLastCommittedHeight(ctx, shmcl)
+	lastCommittedHeight, err := shielder.GetLastCommittedHeight(ctx, shmcl)
 	if err != nil {
 		return nil, err
 	}
 
-	err = clone.fetchAndApplyEvents(ctx, shmcl, height)
+	clone, err := shielder.fetchAndApplyEvents(ctx, shmcl, height)
 	if err != nil {
 		return nil, err
 	}
