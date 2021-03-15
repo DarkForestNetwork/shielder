@@ -345,6 +345,10 @@ func (kpr *Keyper) LoadState() error {
 	kpr.State = st.State
 	kpr.Shielder = st.Shielder
 	kpr.MainChain = st.MainChain
+
+	// We don't store the pending actions, so for the moment it's better to reset the
+	// PendingHalfStep. XXX
+	kpr.State.PendingHalfStep = nil
 	return nil
 }
 
