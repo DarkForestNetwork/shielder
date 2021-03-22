@@ -31,7 +31,7 @@ func init() {
 	gob.Register(ed25519.GenPrivKeyFromSecret([]byte{}).PubKey())
 }
 
-// EncryptionPublicKey is a gob serializable version of ecies.PublicKey
+// EncryptionPublicKey is a gob serializable version of ecies.PublicKey.
 type EncryptionPublicKey ecies.PublicKey
 
 func (epk *EncryptionPublicKey) GobEncode() ([]byte, error) {
@@ -47,7 +47,7 @@ func (epk *EncryptionPublicKey) GobDecode(data []byte) error {
 	return nil
 }
 
-// Encrypt the given message m
+// Encrypt the given message m.
 func (epk *EncryptionPublicKey) Encrypt(rand io.Reader, m []byte) ([]byte, error) {
 	return ecies.Encrypt(rand, (*ecies.PublicKey)(epk), m, nil, nil)
 }
@@ -65,7 +65,7 @@ type Shielder struct {
 	Eons                 []Eon
 }
 
-// NewShielder creates an empty Shielder struct
+// NewShielder creates an empty Shielder struct.
 func NewShielder() *Shielder {
 	return &Shielder{
 		CurrentBlock:         -1,
@@ -282,13 +282,13 @@ func (shielder *Shielder) fetchAndApplyEvents(ctx context.Context, shmcl client.
 	return shielder, nil
 }
 
-// IsCheckedIn checks if the given address sent it's check-in message
+// IsCheckedIn checks if the given address sent it's check-in message.
 func (shielder *Shielder) IsCheckedIn(addr common.Address) bool {
 	_, ok := shielder.KeyperEncryptionKeys[addr]
 	return ok
 }
 
-// IsKeyper checks if the given address is a keyper in any of the given configs
+// IsKeyper checks if the given address is a keyper in any of the given configs.
 func (shielder *Shielder) IsKeyper(addr common.Address) bool {
 	for _, cfg := range shielder.BatchConfigs {
 		if cfg.IsKeyper(addr) {
@@ -353,7 +353,7 @@ func (shielder *Shielder) SyncToHead(ctx context.Context, shmcl client.Client) (
 	return shielder.SyncToHeight(ctx, shmcl, height)
 }
 
-// SyncToHeight syncs the state with the remote state until the given height
+// SyncToHeight syncs the state with the remote state until the given height.
 func (shielder *Shielder) SyncToHeight(ctx context.Context, shmcl client.Client, height int64) (*Shielder, error) {
 	nodeStatus, err := shmcl.Status(ctx)
 	if err != nil {

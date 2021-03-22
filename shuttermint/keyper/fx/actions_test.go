@@ -17,7 +17,7 @@ import (
 )
 
 // exampleStruct is a struct which contains an IAction valued field, in order to test serializing
-// IActions with gob
+// IActions with gob.
 type exampleStruct struct {
 	Action IAction
 }
@@ -40,7 +40,7 @@ func sendShielderMessage() *SendShielderMessage {
 }
 
 // TestSendShielderMessageGobable tests that a SendShielderMessage is gobable. We need a
-// dedicated test here, because SendShielderMessage contains a protocol buffer Msg field
+// dedicated test here, because SendShielderMessage contains a protocol buffer Msg field.
 func TestSendShielderMessageGobable(t *testing.T) {
 	a1 := exampleStruct{Action: sendShielderMessage()}
 	a2 := exampleStruct{}
