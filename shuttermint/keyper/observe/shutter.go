@@ -9,6 +9,7 @@ import (
 	"log"
 	"reflect"
 	"sort"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
@@ -21,6 +22,11 @@ import (
 
 	"shielder/shuttermint/keyper/shielderevents"
 	"shielder/shuttermint/medley"
+)
+
+const (
+	shuttermintTimeout       = 10 * time.Second
+	shielderReconnectInterval = 5 * time.Second
 )
 
 var errEonNotFound = errors.New("eon not found")
@@ -380,4 +386,57 @@ func (shielder *Shielder) SyncToHeight(ctx context.Context, shmcl client.Client,
 // IsSynced checks if the shuttermint node is synced with the network.
 func (shielder *Shielder) IsSynced() bool {
 	return shielder.NodeStatus == nil || !shielder.NodeStatus.SyncInfo.CatchingUp
+}
+
+// SyncShielder subscribes to new blocks and syncs the shielder object with the head block in a
+// loop. If writes newly synced shielder objects to the shielders channel, as well as errors to the
+// syncErrors channel.
+func SyncShielder(ctx context.Context, shmcl client.Client, shielder *Shielder, shielders chan<- *Shielder, syncErrors chan<- error) error {
+	name := "keyper"
+	query := "tm.event = 'NewBlock'"
+	events, err := shmcl.Subscribe(ctx, name, query)
+	if err != nil {
+		return err
+	}
+
+	reconnect := func() {
+		for {
+			log.Println("Attempting reconnection to Shielder")
+
+			ctx2, cancel2 := context.WithTimeout(ctx, shielderReconnectInterval)
+			events, err = shmcl.Subscribe(ctx2, name, query)
+			cancel2()
+
+			if err != nil {
+				// try again, unless context is canceled
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					continue
+				}
+			} else {
+				log.Println("Shielder connection regained")
+				return
+			}
+		}
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-events:
+			newShielder, err := shielder.SyncToHead(ctx, shmcl)
+			if err != nil {
+				syncErrors <- err
+			} else {
+				shielders <- newShielder
+				shielder = newShielder
+			}
+		case <-time.After(shuttermintTimeout):
+			log.Println("No Shielder blocks received in a long time")
+			reconnect()
+		}
+	}
 }
