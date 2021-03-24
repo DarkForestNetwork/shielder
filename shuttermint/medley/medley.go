@@ -1,4 +1,4 @@
-// package medley provides some functions that may be useful in various parts of shielder
+// Package medley provides some functions that may be useful in various parts of shielder
 package medley
 
 import (
