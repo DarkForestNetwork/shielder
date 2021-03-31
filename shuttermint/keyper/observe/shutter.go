@@ -353,7 +353,6 @@ func (shielder *Shielder) SyncToHead(ctx context.Context, shmcl client.Client) (
 		return nil, err
 	}
 	if height == shielder.CurrentBlock {
-		log.Printf("*** not syncing. already have synced to block %d", height)
 		return shielder, nil
 	}
 	return shielder.SyncToHeight(ctx, shmcl, height)
