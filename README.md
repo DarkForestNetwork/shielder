@@ -1,7 +1,7 @@
 # Shielder
 
-This repository contains Shielder, a threshold encryption based frontrunning protection guard for
-Ethereum.
+This repository contains Shielder, a threshold encryption based frontrunning protection system for
+Ethereum smart contracts.
 
 The code is split into three directories:
 
@@ -10,6 +10,9 @@ The code is split into three directories:
 - `shuttermint/`: the main application code written in Go, in particular the Shielder and Keyper
   implementation
 - `example/`: a little example dapp user interface
+
+To see it in action, check out the example application hosted
+[here](https://shielder.github.io/shielder-example-dapp/).
 
 ## Setup a Full Testing Environment
 
