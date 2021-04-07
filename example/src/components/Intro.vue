@@ -5,7 +5,7 @@
         This minimal example application illustrates the user experience of
         Shielder. It is the first frontrunning resistant public on-chain
         billboard! For more information, check out
-        <a href="http://shielder.ghost.io/shielder-the-first-testnet-release/"
+        <a href="https://shielder.ghost.io/shielder-alpha-release-on-testnet/"
           >this blog post</a
         >.
       </p>
