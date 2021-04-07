@@ -408,9 +408,9 @@ func (shielder *Shielder) IsSynced() bool {
 }
 
 // SyncShielder subscribes to new blocks and syncs the shielder object with the head block in a
-// loop. If writes newly synced shielder objects to the shielders channel, as well as errors to the
+// loop. It writes newly synced shielder objects to the shielders channel, as well as errors to the
 // syncErrors channel.
-func SyncShielder(ctx context.Context, shmcl client.Client, shielder *Shielder, shielders chan<- *Shielder, syncErrors chan<- error) error {
+func SyncShielder(ctx context.Context, shmcl client.Client, shielder *Shielder, shielders chan<- *Shielder) error {
 	name := "keyper"
 	query := "tm.event = 'NewBlock'"
 	events, err := shmcl.Subscribe(ctx, name, query)
@@ -448,7 +448,7 @@ func SyncShielder(ctx context.Context, shmcl client.Client, shielder *Shielder, 
 		case <-events:
 			newShielder, err := shielder.SyncToHead(ctx, shmcl)
 			if err != nil {
-				syncErrors <- err
+				log.Printf("Error in Shielder.SyncToHead: %+v", err)
 			} else {
 				shielders <- newShielder
 				shielder = newShielder
