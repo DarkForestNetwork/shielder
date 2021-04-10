@@ -70,4 +70,10 @@ func main() {
 		d.EpochSecretKeyShares = nil
 	}
 	report("shielder no shares", full, storedState{Shielder: cl})
+	if st.State.SyncHeight == 0 {
+		st.State.SyncHeight = st.Shielder.CurrentBlock + 1
+	}
+	filter := st.State.GetShielderFilter()
+	fmt.Printf("FILTER: %+v\n", filter)
+	report("filtered", full, storedState{Shielder: st.Shielder.ApplyFilter(filter)})
 }

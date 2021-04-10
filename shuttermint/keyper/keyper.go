@@ -174,35 +174,32 @@ func (kpr *Keyper) Run() error {
 	mainChains := make(chan *observe.MainChain)
 	shielders := make(chan *observe.Shielder)
 	signals := make(chan os.Signal, 1)
+	filter := make(chan observe.ShielderFilter, 3)
 	signal.Notify(signals, syscall.SIGUSR1)
 	g.Go(func() error {
 		return observe.SyncMain(ctx, &kpr.ContractCaller, kpr.CurrentWorld().MainChain, mainChains)
 	})
 	g.Go(func() error {
-		return observe.SyncShielder(ctx, kpr.shmcl, kpr.CurrentWorld().Shielder, shielders)
+		return observe.SyncShielder(ctx, kpr.shmcl, kpr.CurrentWorld().Shielder, shielders, filter)
 	})
 
+	var world observe.World
 	// Sync main and shielder chain at least once. Otherwise, the state of one of the two will
 	// be much more recent than the other one when the first block appears.
-	for seenMainChain, seenShielder := false, false; !(seenMainChain && seenShielder); {
+	for world.MainChain == nil || world.Shielder == nil {
 		select {
 		case <-signals:
 			kpr.dumpInternalState()
+			continue
 		case mainChain := <-mainChains:
-			world := kpr.CurrentWorld()
 			world.MainChain = mainChain
-			kpr.world.Store(world)
-			seenMainChain = true
 		case shielder := <-shielders:
-			world := kpr.CurrentWorld()
 			world.Shielder = shielder
-			kpr.world.Store(world)
-			seenShielder = true
 		case <-ctx.Done():
 			return g.Wait()
 		}
 	}
-
+	kpr.world.Store(world)
 	kpr.runenv.StartBackgroundTasks(ctx, g)
 	havePendingActions, err := kpr.runenv.Load()
 	if err != nil {
@@ -222,19 +219,17 @@ func (kpr *Keyper) Run() error {
 		select {
 		case <-signals:
 			kpr.dumpInternalState()
-		case mainChain := <-mainChains:
-			world := kpr.CurrentWorld()
-			world.MainChain = mainChain
-			kpr.world.Store(world)
-			kpr.runOneStep(ctx)
-		case shielder := <-shielders:
-			world := kpr.CurrentWorld()
-			world.Shielder = shielder
-			kpr.world.Store(world)
-			kpr.runOneStep(ctx)
+			continue
 		case <-ctx.Done():
 			return g.Wait()
+		case mainChain := <-mainChains:
+			world.MainChain = mainChain
+		case shielder := <-shielders:
+			world.Shielder = shielder
 		}
+		kpr.world.Store(world)
+		kpr.runOneStep(ctx)
+		filter <- kpr.State.GetShielderFilter()
 	}
 }
 
@@ -274,6 +269,11 @@ func (kpr *Keyper) LoadState() error {
 	err = dec.Decode(&st)
 	if err != nil {
 		return err
+	}
+
+	if st.State.SyncHeight == 0 && st.Shielder.CurrentBlock > 0 {
+		log.Printf("Fixing SyncHeight: %d", st.Shielder.CurrentBlock)
+		st.State.SyncHeight = st.Shielder.CurrentBlock // We didn't have this field in older versions
 	}
 	kpr.State = st.State
 	world := observe.World{

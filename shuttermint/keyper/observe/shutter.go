@@ -58,6 +58,16 @@ func (epk *EncryptionPublicKey) Encrypt(rand io.Reader, m []byte) ([]byte, error
 	return ecies.Encrypt(rand, (*ecies.PublicKey)(epk), m, nil, nil)
 }
 
+// ShielderFilter is used to filter the shielder state we do build. Filtering is done in
+// Shielder.ApplyFilter.
+type ShielderFilter struct {
+	SyncHeight int64
+}
+
+func (filter ShielderFilter) NeedsUpdate(newFilter ShielderFilter) bool {
+	return newFilter.SyncHeight > filter.SyncHeight
+}
+
 // Shielder let's a keyper fetch all necessary information from a shuttermint node. The only source
 // for the data stored in this struct should be the shielder node.  The SyncToHead method can be
 // used to update the data. All other accesses should be read-only.
@@ -69,6 +79,7 @@ type Shielder struct {
 	BatchConfigs         []shielderevents.BatchConfig
 	Batches              map[uint64]*BatchData
 	Eons                 []Eon
+	Filter               ShielderFilter
 }
 
 // NewShielder creates an empty Shielder struct.
@@ -91,9 +102,104 @@ type Eon struct {
 	EpochSecretKeyShares []shielderevents.EpochSecretKeyShare
 }
 
+func (eon *Eon) ApplyFilter(syncHeight int64) *Eon {
+	clone := Eon{
+		Eon:         eon.Eon,
+		StartHeight: eon.StartHeight,
+		StartEvent:  eon.StartEvent,
+	}
+	clone.Commitments = append(clone.Commitments, eon.GetPolyCommitments(syncHeight)...)
+	clone.PolyEvals = append(clone.PolyEvals, eon.GetPolyEvals(syncHeight)...)
+	clone.Accusations = append(clone.Accusations, eon.GetAccusations(syncHeight)...)
+	clone.Apologies = append(clone.Apologies, eon.GetApologies(syncHeight)...)
+	return &clone
+}
+
+func (eon *Eon) GetPolyCommitments(syncHeight int64) []shielderevents.PolyCommitment {
+	slice := eon.Commitments
+	idx := sort.Search(len(slice),
+		func(i int) bool {
+			return slice[i].Height >= syncHeight
+		})
+	if idx == len(slice) {
+		return nil
+	}
+	return slice[idx:]
+}
+
+func (eon *Eon) GetPolyEvals(syncHeight int64) []shielderevents.PolyEval {
+	slice := eon.PolyEvals
+	idx := sort.Search(len(slice),
+		func(i int) bool {
+			return slice[i].Height >= syncHeight
+		})
+	if idx == len(slice) {
+		return nil
+	}
+	return slice[idx:]
+}
+
+func (eon *Eon) GetAccusations(syncHeight int64) []shielderevents.Accusation {
+	slice := eon.Accusations
+	idx := sort.Search(len(slice),
+		func(i int) bool {
+			return slice[i].Height >= syncHeight
+		})
+	if idx == len(slice) {
+		return nil
+	}
+	return slice[idx:]
+}
+
+func (eon *Eon) GetApologies(syncHeight int64) []shielderevents.Apology {
+	slice := eon.Apologies
+	idx := sort.Search(len(slice),
+		func(i int) bool {
+			return slice[i].Height >= syncHeight
+		})
+	if idx == len(slice) {
+		return nil
+	}
+	return slice[idx:]
+}
+
+func (eon *Eon) GetEpochSecretKeyShares(syncHeight int64) []shielderevents.EpochSecretKeyShare {
+	slice := eon.EpochSecretKeyShares
+	idx := sort.Search(len(slice),
+		func(i int) bool {
+			return slice[i].Height >= syncHeight
+		})
+	if idx == len(slice) {
+		return nil
+	}
+	return slice[idx:]
+}
+
 type BatchData struct {
 	BatchIndex           uint64
 	DecryptionSignatures []shielderevents.DecryptionSignature
+}
+
+// filterSyncHeight removes events from shielder.Eons that were generated at a height below the
+// Filter's SyncHeight.
+func (shielder *Shielder) filterSyncHeight() {
+	syncHeight := shielder.Filter.SyncHeight
+	newEons := make([]Eon, len(shielder.Eons))
+	for i := range shielder.Eons {
+		newEons[i] = *shielder.Eons[i].ApplyFilter(syncHeight)
+	}
+	shielder.Eons = newEons
+}
+
+// ApplyFilter applies the given filter and returns a new shielder object with the filter applied.
+func (shielder *Shielder) ApplyFilter(newFilter ShielderFilter) *Shielder {
+	if !shielder.Filter.NeedsUpdate(newFilter) {
+		return shielder
+	}
+	clone := *shielder
+	clone.Filter = newFilter
+	clone.filterSyncHeight()
+	return &clone
 }
 
 func (shielder *Shielder) applyTxEvents(height int64, events []abcitypes.Event) {
@@ -410,7 +516,7 @@ func (shielder *Shielder) IsSynced() bool {
 // SyncShielder subscribes to new blocks and syncs the shielder object with the head block in a
 // loop. It writes newly synced shielder objects to the shielders channel, as well as errors to the
 // syncErrors channel.
-func SyncShielder(ctx context.Context, shmcl client.Client, shielder *Shielder, shielders chan<- *Shielder) error {
+func SyncShielder(ctx context.Context, shmcl client.Client, shielder *Shielder, shielders chan<- *Shielder, filter <-chan ShielderFilter) error {
 	name := "keyper"
 	query := "tm.event = 'NewBlock'"
 	events, err := shmcl.Subscribe(ctx, name, query)
@@ -445,6 +551,8 @@ func SyncShielder(ctx context.Context, shmcl client.Client, shielder *Shielder, 
 		select {
 		case <-ctx.Done():
 			return nil
+		case f := <-filter:
+			shielder = shielder.ApplyFilter(f)
 		case <-events:
 			newShielder, err := shielder.SyncToHead(ctx, shmcl)
 			if err != nil {
