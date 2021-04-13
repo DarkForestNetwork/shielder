@@ -253,7 +253,6 @@ type storedState struct {
 	State     *State
 	Shielder   *observe.Shielder
 	MainChain *observe.MainChain
-	Actions   []fx.IAction
 }
 
 func (kpr *Keyper) pathStateGob() string {
