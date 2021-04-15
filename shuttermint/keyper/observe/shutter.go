@@ -62,10 +62,11 @@ func (epk *EncryptionPublicKey) Encrypt(rand io.Reader, m []byte) ([]byte, error
 // Shielder.ApplyFilter.
 type ShielderFilter struct {
 	SyncHeight int64
+	BatchIndex uint64
 }
 
 func (filter ShielderFilter) NeedsUpdate(newFilter ShielderFilter) bool {
-	return newFilter.SyncHeight > filter.SyncHeight
+	return newFilter.SyncHeight > filter.SyncHeight || newFilter.BatchIndex > filter.BatchIndex
 }
 
 // Shielder let's a keyper fetch all necessary information from a shuttermint node. The only source
@@ -191,6 +192,17 @@ func (shielder *Shielder) filterSyncHeight() {
 	shielder.Eons = newEons
 }
 
+func (shielder *Shielder) filterBatchIndex() {
+	batchIndex := shielder.Filter.BatchIndex
+	newBatches := make(map[uint64]*BatchData)
+	for b, bd := range shielder.Batches {
+		if b >= batchIndex {
+			newBatches[b] = bd
+		}
+	}
+	shielder.Batches = newBatches
+}
+
 // ApplyFilter applies the given filter and returns a new shielder object with the filter applied.
 func (shielder *Shielder) ApplyFilter(newFilter ShielderFilter) *Shielder {
 	if !shielder.Filter.NeedsUpdate(newFilter) {
@@ -199,6 +211,7 @@ func (shielder *Shielder) ApplyFilter(newFilter ShielderFilter) *Shielder {
 	clone := *shielder
 	clone.Filter = newFilter
 	clone.filterSyncHeight()
+	clone.filterBatchIndex()
 	return &clone
 }
 
