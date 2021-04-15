@@ -73,7 +73,7 @@ func main() {
 	if st.State.SyncHeight == 0 {
 		st.State.SyncHeight = st.Shielder.CurrentBlock + 1
 	}
-	filter := st.State.GetShielderFilter()
+	filter := st.State.GetShielderFilter(st.MainChain)
 	fmt.Printf("FILTER: %+v\n", filter)
 	report("filtered", full, storedState{Shielder: st.Shielder.ApplyFilter(filter)})
 }

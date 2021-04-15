@@ -241,7 +241,7 @@ func (kpr *Keyper) Run() error {
 		}
 		kpr.world.Store(world)
 		kpr.runOneStep(ctx)
-		filter <- kpr.State.GetShielderFilter()
+		filter <- kpr.State.GetShielderFilter(world.MainChain)
 	}
 }
 

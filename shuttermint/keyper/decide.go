@@ -263,8 +263,11 @@ func NewState() *State {
 }
 
 // GetShielderFilter returns the shielder filter to be applied to the Shielder state.
-func (st *State) GetShielderFilter() observe.ShielderFilter {
-	return observe.ShielderFilter{SyncHeight: st.SyncHeight}
+func (st *State) GetShielderFilter(mainChain *observe.MainChain) observe.ShielderFilter {
+	return observe.ShielderFilter{
+		SyncHeight: st.SyncHeight,
+		BatchIndex: mainChain.NumExecutionHalfSteps / 2,
+	}
 }
 
 // Decider decides on the next actions to take based on our internal State and the current Shielder

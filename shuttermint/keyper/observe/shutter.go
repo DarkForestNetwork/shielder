@@ -200,6 +200,11 @@ func (shielder *Shielder) filterBatchIndex() {
 			newBatches[b] = bd
 		}
 	}
+	// log.Printf("Filter batch index: old=%d new=%d diff=%d",
+	//	len(shielder.Batches),
+	//	len(newBatches),
+	//	len(shielder.Batches)-len(newBatches),
+	// )
 	shielder.Batches = newBatches
 }
 
