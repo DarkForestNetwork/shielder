@@ -479,7 +479,7 @@ func (shielder *Shielder) GetSortedDecryptionSignaturesWithIndices(batchIndex ui
 	for _, ev := range b.DecryptionSignatures {
 		keyperIndex, ok := config.KeyperIndex(ev.Sender)
 		if !ok {
-			return [][]byte{}, []uint64{}, pkgErrors.Errorf("signer %d not a keyper in batch %d", ev.Sender.String(), batchIndex)
+			return [][]byte{}, []uint64{}, pkgErrors.Errorf("signer %s not a keyper in batch %d", ev.Sender.String(), batchIndex)
 		}
 
 		sigsAndIndices = append(sigsAndIndices, SigAndIndex{
