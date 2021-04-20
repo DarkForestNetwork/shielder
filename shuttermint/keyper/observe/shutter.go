@@ -466,6 +466,42 @@ func (shielder *Shielder) FindBatchConfigByBatchIndex(batchIndex uint64) shielde
 	return shielderevents.BatchConfig{}
 }
 
+func (shielder *Shielder) GetSortedDecryptionSignaturesWithIndices(batchIndex uint64) ([][]byte, []uint64, error) {
+	config := shielder.FindBatchConfigByBatchIndex(batchIndex)
+	b := shielder.getBatchData(batchIndex)
+
+	type SigAndIndex struct {
+		signature []byte
+		index     uint64
+	}
+
+	sigsAndIndices := []SigAndIndex{}
+	for _, ev := range b.DecryptionSignatures {
+		keyperIndex, ok := config.KeyperIndex(ev.Sender)
+		if !ok {
+			return [][]byte{}, []uint64{}, pkgErrors.Errorf("signer %d not a keyper in batch %d", ev.Sender.String(), batchIndex)
+		}
+
+		sigsAndIndices = append(sigsAndIndices, SigAndIndex{
+			signature: ev.Signature,
+			index:     keyperIndex,
+		})
+	}
+
+	sort.Slice(sigsAndIndices, func(i, j int) bool {
+		return sigsAndIndices[i].index < sigsAndIndices[j].index
+	})
+
+	signatures := [][]byte{}
+	indices := []uint64{}
+	for _, sigAndIndex := range sigsAndIndices {
+		signatures = append(signatures, sigAndIndex.signature)
+		indices = append(indices, sigAndIndex.index)
+	}
+
+	return signatures, indices, nil
+}
+
 func (shielder *Shielder) ShallowClone() *Shielder {
 	s := *shielder
 	return &s
